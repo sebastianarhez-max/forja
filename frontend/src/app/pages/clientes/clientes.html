@@ -1,0 +1,129 @@
+<form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <h2 class="card-title">{{ editandoId() ? 'Editar socio' : 'Registrar socio' }}</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="nombres">Nombres</label>
+      <input id="nombres" formControlName="nombres" placeholder="Ej. Diego" />
+      <app-campo-error [control]="form.controls.nombres" />
+    </div>
+    <div class="field">
+      <label for="apellidos">Apellidos</label>
+      <input id="apellidos" formControlName="apellidos" placeholder="Ej. Salazar Ruiz" />
+      <app-campo-error [control]="form.controls.apellidos" />
+    </div>
+    <div class="field">
+      <label for="dni">DNI</label>
+      <input id="dni" formControlName="dni" maxlength="8" placeholder="8 dígitos" />
+      <app-campo-error [control]="form.controls.dni" formato="El DNI debe tener 8 dígitos" />
+    </div>
+    <div class="field">
+      <label for="correo">Correo</label>
+      <input id="correo" type="email" formControlName="correo" placeholder="correo@ejemplo.com" />
+      <app-campo-error [control]="form.controls.correo" />
+    </div>
+    <div class="field">
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" formControlName="telefono" maxlength="9" placeholder="9 dígitos" />
+      <app-campo-error [control]="form.controls.telefono" formato="El teléfono debe tener 9 dígitos" />
+    </div>
+    <div class="field">
+      <label for="nac">Fecha de nacimiento</label>
+      <input id="nac" type="date" formControlName="fechaNacimiento" [max]="hoy" />
+    </div>
+    <div class="field">
+      <label for="direccion">Dirección</label>
+      <input id="direccion" formControlName="direccion" placeholder="Ej. Av. Arequipa 456" />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" formControlName="estado">
+        <option [ngValue]="true">Activo</option>
+        <option [ngValue]="false">Inactivo</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="guardando()">
+      {{ editandoId() ? 'Guardar cambios' : 'Registrar socio' }}
+    </button>
+    @if (editandoId()) {
+      <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<section class="card">
+  <div class="card-head">
+    <div>
+      <h2 class="card-title">Socios registrados</h2>
+      <p class="card-sub">{{ lista().length }} socios en total</p>
+    </div>
+    <input class="input buscador" placeholder="Buscar por nombre, DNI o correo..." [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" />
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Correo</th><th>Nacimiento</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (c of filtrados(); track c.idCliente) {
+          <tr [class.inactivo]="!c.estado">
+            <td class="strong">{{ c.nombres }} {{ c.apellidos }}</td>
+            <td>{{ c.dni }}</td>
+            <td>{{ c.telefono }}</td>
+            <td>{{ c.correo }}</td>
+            <td>{{ c.fechaNacimiento | fecha }}</td>
+            <td><span class="badge" [class.badge-ok]="c.estado" [class.badge-bad]="!c.estado">{{ c.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="acciones">
+                <button class="btn btn-outline btn-sm" type="button" (click)="verHistorial(c)">Historial</button>
+                <a class="btn btn-outline btn-sm" routerLink="/socios/evaluaciones" [queryParams]="{ idCliente: c.idCliente }">Evaluaciones</a>
+                <button class="btn btn-outline btn-sm" type="button" (click)="editar(c)">Editar</button>
+                <button class="btn btn-sm" [class.btn-danger]="c.estado" [class.btn-outline]="!c.estado" type="button" (click)="cambiarEstado(c)">
+                  {{ c.estado ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="vacio">No se encontraron socios</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+@if (clienteHistorial(); as c) {
+  <section class="card" id="historial">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Historial de asistencia · {{ c.nombres }} {{ c.apellidos }}</h2>
+        <p class="card-sub">Reservas, ingresos y faltas registradas</p>
+      </div>
+      <button class="btn btn-link" type="button" (click)="clienteHistorial.set(null)">Cerrar</button>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Fecha</th><th>Actividad</th><th>Entrenador</th><th>Horario</th><th>Estado</th><th class="num">Pagado</th></tr>
+        </thead>
+        <tbody>
+          @for (h of historial(); track $index) {
+            <tr>
+              <td>{{ h.fecha | fecha }}</td>
+              <td class="strong">{{ h.actividad }}</td>
+              <td>{{ h.entrenador }}</td>
+              <td>{{ h.horaInicio | hora }} – {{ h.horaFin | hora }}</td>
+              <td>
+                <span class="badge" [class.badge-ok]="h.estado === 'ASISTIO'" [class.badge-warn]="h.estado === 'RESERVADO'" [class.badge-bad]="h.estado === 'FALTO'">{{ h.estado | estadoAsistencia }}</span>
+              </td>
+              <td class="num">{{ h.montoPagado | soles }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="vacio">Este socio aún no tiene asistencias</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

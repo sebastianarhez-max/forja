@@ -1,0 +1,32 @@
+<header class="topbar">
+  <button class="hamburguesa" type="button" (click)="menuAbierto.set(!menuAbierto())" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+  <a routerLink="/inicio" class="marca">FORJA</a>
+  <div class="usuario">
+    <span class="rol">Administrador: </span><span class="nombre">{{ nombre }}</span>
+  </div>
+</header>
+
+<div class="cuerpo">
+  <nav class="sidebar" [class.abierto]="menuAbierto()">
+    <div class="menu">
+      @for (g of menu; track g.titulo) {
+        <div class="grupo">{{ g.titulo }}</div>
+        <ul>
+          @for (item of g.items; track item.ruta) {
+            <li><a [routerLink]="item.ruta" routerLinkActive="activo">{{ item.texto }}</a></li>
+          }
+        </ul>
+      }
+    </div>
+    <button type="button" class="salir" (click)="cerrarSesion()">Cerrar sesión</button>
+  </nav>
+  @if (menuAbierto()) {
+    <div class="velo" (click)="menuAbierto.set(false)"></div>
+  }
+
+  <main class="contenido">
+    <router-outlet />
+  </main>
+</div>

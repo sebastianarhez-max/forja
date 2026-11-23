@@ -1,0 +1,18 @@
+# Backend (Java / Maven / Eclipse-STS)
+backend/target/
+.settings/
+.classpath
+.project
+.factorypath
+*.iml
+.idea/
+
+# Frontend (Angular)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# General
+.env
+.vscode/
+.DS_Store

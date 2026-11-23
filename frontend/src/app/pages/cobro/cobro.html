@@ -1,0 +1,67 @@
+@if (clasesLibres().length === 0) {
+  <section class="card">
+    <h2 class="card-title">No hay clases libres</h2>
+    <p class="card-sub">Programa un horario con acceso "Libre" y su precio de entrada.</p>
+    <a class="btn btn-primary" routerLink="/clases/horarios">Programar horario</a>
+  </section>
+} @else {
+  <section class="card">
+    <h2 class="card-title">Clase libre</h2>
+    <div class="field" style="margin-bottom: 14px">
+      <label for="clase">Clase</label>
+      <select id="clase" [ngModel]="idHorario()" (ngModelChange)="elegirClase($event)">
+        @for (h of clasesLibres(); track h.idHorario) {
+          <option [ngValue]="h.idHorario">{{ texto(h) }}</option>
+        }
+      </select>
+    </div>
+    @if (clase(); as h) {
+      <div class="info-box">
+        <div class="info-label">Clase</div>
+        <div class="info-value">{{ h.actividad.nombre }}, {{ h.dia | dia }} {{ h.horaInicio | hora }} a {{ h.horaFin | hora }}</div>
+        <div class="small muted">{{ h.entrenador.nombres }} {{ h.entrenador.apellidos }} · {{ h.sala?.nombre ?? 'Sin sala' }}</div>
+      </div>
+      <div class="stats">
+        <div class="stat dark"><div class="stat-label">Precio de entrada</div><div class="stat-value">{{ h.precioEntrada | soles }}</div></div>
+        @if (cupos(); as c) {
+          <div class="stat"><div class="stat-label">Cupos disponibles</div><div class="stat-value">{{ c.disponibles }}</div></div>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Cobro</h2>
+    <div class="form-grid">
+      <div class="field" style="grid-column: span 2">
+        <label for="cliente">Socio</label>
+        <select id="cliente" [ngModel]="idCliente()" (ngModelChange)="idCliente.set($event)">
+          <option [ngValue]="null" disabled>Seleccione un socio</option>
+          @for (c of clientes(); track c.idCliente) {
+            <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }} · DNI {{ c.dni || '—' }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" [ngModel]="fecha()" (ngModelChange)="cambiarFecha($event)" />
+      </div>
+    </div>
+    <div class="field" style="margin-bottom: 14px">
+      <label>Método de pago</label>
+      <div class="chips">
+        @for (t of tiposPago(); track t.idTipoPago) {
+          <button type="button" class="chip" [class.activo]="idTipoPago() === t.idTipoPago" (click)="idTipoPago.set(t.idTipoPago)">{{ t.nombre }}</button>
+        }
+      </div>
+    </div>
+    <div class="alert">Las clases libres no exigen membresía. El método de pago es obligatorio.</div>
+    <button class="btn btn-primary" type="button" (click)="registrar()" [disabled]="registrando()">Registrar ingreso y cobro</button>
+
+    @if (ultimo(); as u) {
+      <div class="alert ok" style="margin: 16px 0 0">
+        Último cobro: {{ u.cliente.nombres }} {{ u.cliente.apellidos }} · {{ u.montoPagado | soles }} · ingreso {{ u.horaIngreso | hora }}
+      </div>
+    }
+  </section>
+}

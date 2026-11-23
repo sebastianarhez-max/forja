@@ -1,0 +1,4457 @@
+{
+  "info": {
+    "name": "FORJA API - Gimnasio (TB1)",
+    "description": "API REST Gimnasio FORJA. 1) Ejecuta '00 Autenticacion > Login' (guarda el token solo). 2) Prueba cada carpeta. Cambia la variable baseUrl a la URL de Render al desplegar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://grupo-5-forja-api.onrender.com"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "id_usuario",
+      "value": "6"
+    },
+    {
+      "key": "id_entrenador",
+      "value": "6"
+    },
+    {
+      "key": "id_cliente",
+      "value": "6"
+    },
+    {
+      "key": "id_actividad",
+      "value": "7"
+    },
+    {
+      "key": "id_horario",
+      "value": "7"
+    },
+    {
+      "key": "id_plan",
+      "value": "6"
+    },
+    {
+      "key": "id_membresia",
+      "value": "6"
+    },
+    {
+      "key": "id_tipopago",
+      "value": "6"
+    },
+    {
+      "key": "id_pago",
+      "value": "6"
+    },
+    {
+      "key": "id_rutina",
+      "value": "6"
+    },
+    {
+      "key": "id_evaluacion",
+      "value": "6"
+    },
+    {
+      "key": "id_categoria",
+      "value": "6"
+    },
+    {
+      "key": "id_producto",
+      "value": "6"
+    },
+    {
+      "key": "id_venta",
+      "value": "6"
+    },
+    {
+      "key": "id_detalleventa",
+      "value": "6"
+    },
+    {
+      "key": "id_torneo",
+      "value": "6"
+    },
+    {
+      "key": "id_inscripciontorneo",
+      "value": "6"
+    },
+    {
+      "key": "id_asistencia",
+      "value": "6"
+    },
+    {
+      "key": "id_reserva",
+      "value": "6"
+    },
+    {
+      "key": "id_sala",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Autenticacion (ejecutar primero)",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"carlos\",\n  \"password\": \"1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Devuelve el token JWT y lo guarda automaticamente en la variable {{token}}. Usuarios: carlos, lucia, sebastian, pnunez, mrios (clave 1234)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", function () { pm.response.to.have.status(200); });",
+                  "var r = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", r.token);",
+                  "pm.test(\"Devuelve token\", function () { pm.expect(r.token).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Usuario",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Rosa\",\n  \"apellidos\": \"Diaz Pena\",\n  \"dni\": \"46789123\",\n  \"login\": \"admin2\",\n  \"password\": \"1234\",\n  \"correo\": \"rosa@gym.com\",\n  \"telefono\": \"944555666\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_usuario}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_usuario\", r.data.idUsuario); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Rosa\",\n  \"apellidos\": \"Diaz Pena\",\n  \"dni\": \"46789123\",\n  \"login\": \"admin2\",\n  \"password\": \"1234\",\n  \"correo\": \"rosa@gym.com\",\n  \"telefono\": \"900111222\",\n  \"idUsuario\": {{id_usuario}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario/{{id_usuario}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Entrenador",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Luis\",\n  \"apellidos\": \"Paredes Soto\",\n  \"dni\": \"47891234\",\n  \"especialidad\": \"Boxeo y defensa personal\",\n  \"telefono\": \"933222111\",\n  \"correo\": \"luis@gym.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_entrenador}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_entrenador\", r.data.idEntrenador); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Luis\",\n  \"apellidos\": \"Paredes Soto\",\n  \"dni\": \"47891234\",\n  \"especialidad\": \"Boxeo y kickboxing\",\n  \"telefono\": \"933222111\",\n  \"correo\": \"luis@gym.com\",\n  \"idEntrenador\": {{id_entrenador}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador/{{id_entrenador}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador",
+                "{{id_entrenador}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Cliente",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Quispe Lazo\",\n  \"dni\": \"75123456\",\n  \"correo\": \"andrea@gmail.com\",\n  \"telefono\": \"922333444\",\n  \"fechaNacimiento\": \"2001-04-10\",\n  \"direccion\": \"Av Javier Prado 1020\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_cliente}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_cliente\", r.data.idCliente); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Andrea\",\n  \"apellidos\": \"Quispe Lazo\",\n  \"dni\": \"75123456\",\n  \"correo\": \"andrea@gmail.com\",\n  \"telefono\": \"911000111\",\n  \"fechaNacimiento\": \"2001-04-10\",\n  \"direccion\": \"Av Javier Prado 1020\",\n  \"idCliente\": {{id_cliente}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente/{{id_cliente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente",
+                "{{id_cliente}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Actividad",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Boxeo\",\n  \"descripcion\": \"Entrenamiento de boxeo recreativo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_actividad}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_actividad\", r.data.idActividad); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Boxeo\",\n  \"descripcion\": \"Boxeo recreativo y acondicionamiento\",\n  \"idActividad\": {{id_actividad}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad/{{id_actividad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad",
+                "{{id_actividad}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Horario",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actividad\": {\n    \"idActividad\": 2\n  },\n  \"entrenador\": {\n    \"idEntrenador\": 1\n  },\n  \"dia\": \"Sabado\",\n  \"horaInicio\": \"09:00:00\",\n  \"horaFin\": \"10:00:00\",\n  \"cupoMaximo\": 20,\n  \"tipoAcceso\": \"MEMBRESIA\",\n  \"precioEntrada\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_horario}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_horario\", r.data.idHorario); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actividad\": {\n    \"idActividad\": 2\n  },\n  \"entrenador\": {\n    \"idEntrenador\": 1\n  },\n  \"dia\": \"Sabado\",\n  \"horaInicio\": \"09:00:00\",\n  \"horaFin\": \"10:00:00\",\n  \"cupoMaximo\": 25,\n  \"tipoAcceso\": \"MEMBRESIA\",\n  \"precioEntrada\": 0,\n  \"idHorario\": {{id_horario}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario/{{id_horario}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario",
+                "{{id_horario}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05b Sala",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/sala",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "sala"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/sala/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "sala",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/sala",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "sala"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sala Postman {{$timestamp}}\",\n  \"capacidad\": 15,\n  \"descripcion\": \"Box y funcional\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_horario}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_sala\", r.data.idSala); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/sala",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "sala"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idSala\": {{id_sala}},\n  \"nombre\": \"Sala Postman {{id_sala}}\",\n  \"capacidad\": 18,\n  \"descripcion\": \"Box y funcional (editada)\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/sala/{{id_sala}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "sala",
+                "{{id_sala}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 Plan",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Bimestral\",\n  \"descripcion\": \"Acceso completo por 60 dias\",\n  \"duracionDias\": 60,\n  \"precio\": 140.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_plan}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_plan\", r.data.idPlan); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Bimestral\",\n  \"descripcion\": \"Acceso completo por 60 dias\",\n  \"duracionDias\": 60,\n  \"precio\": 135.0,\n  \"idPlan\": {{id_plan}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan/{{id_plan}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan",
+                "{{id_plan}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 Membresia",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "membresia"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/membresia/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "membresia",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"plan\": {\n    \"idPlan\": 2\n  },\n  \"fechaInicio\": \"2026-10-02\",\n  \"fechaFin\": \"2026-11-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_membresia}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_membresia\", r.data.idMembresia); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"plan\": {\n    \"idPlan\": 2\n  },\n  \"fechaInicio\": \"2026-10-02\",\n  \"fechaFin\": \"2026-11-05\",\n  \"idMembresia\": {{id_membresia}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/membresia/{{id_membresia}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "membresia",
+                "{{id_membresia}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09 TipoPago",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/tipopago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "tipopago"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/tipopago/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "tipopago",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/tipopago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "tipopago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Paypal\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_tipopago}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_tipopago\", r.data.idTipoPago); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/tipopago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "tipopago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"PayPal\",\n  \"idTipoPago\": {{id_tipopago}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/tipopago/{{id_tipopago}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "tipopago",
+                "{{id_tipopago}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10 Pago",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "pago"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/pago/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "pago",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "pago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membresia\": {\n    \"idMembresia\": 1\n  },\n  \"tipoPago\": {\n    \"idTipoPago\": 1\n  },\n  \"monto\": 80.0,\n  \"concepto\": \"Pago adicional\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_pago}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_pago\", r.data.idPago); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "pago"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"membresia\": {\n    \"idMembresia\": 1\n  },\n  \"tipoPago\": {\n    \"idTipoPago\": 1\n  },\n  \"monto\": 80.0,\n  \"concepto\": \"Pago adicional corregido\",\n  \"idPago\": {{id_pago}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/pago/{{id_pago}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "pago",
+                "{{id_pago}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "11 Rutina",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/rutina",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rutina"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/rutina/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rutina",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/rutina",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rutina"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"entrenador\": {\n    \"idEntrenador\": 1\n  },\n  \"nombre\": \"Full body\",\n  \"objetivo\": \"Tonificar\",\n  \"ejercicios\": [\n    {\n      \"nombre\": \"Sentadilla\",\n      \"series\": 4,\n      \"repeticiones\": 12,\n      \"descansoSeg\": 60\n    },\n    {\n      \"nombre\": \"Flexiones\",\n      \"series\": 3,\n      \"repeticiones\": 15,\n      \"descansoSeg\": 45\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_rutina}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_rutina\", r.data.idRutina); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/rutina",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rutina"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"entrenador\": {\n    \"idEntrenador\": 1\n  },\n  \"nombre\": \"Full body\",\n  \"objetivo\": \"Tonificar y perder grasa\",\n  \"ejercicios\": [\n    {\n      \"nombre\": \"Sentadilla\",\n      \"series\": 4,\n      \"repeticiones\": 12,\n      \"descansoSeg\": 60\n    },\n    {\n      \"nombre\": \"Flexiones\",\n      \"series\": 3,\n      \"repeticiones\": 15,\n      \"descansoSeg\": 45\n    }\n  ],\n  \"idRutina\": {{id_rutina}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/rutina/{{id_rutina}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rutina",
+                "{{id_rutina}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "12 EvaluacionFisica",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/evaluacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "evaluacion"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/evaluacion/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "evaluacion",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/evaluacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "evaluacion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"fecha\": \"2026-10-02\",\n  \"peso\": 63.0,\n  \"altura\": 1.65,\n  \"imc\": 23.1,\n  \"grasaCorporal\": 23.5,\n  \"observaciones\": \"Control mensual\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_evaluacion}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_evaluacion\", r.data.idEvaluacion); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/evaluacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "evaluacion"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"fecha\": \"2026-10-02\",\n  \"peso\": 63.0,\n  \"altura\": 1.65,\n  \"imc\": 23.1,\n  \"grasaCorporal\": 23.5,\n  \"observaciones\": \"Control mensual - mejora\",\n  \"idEvaluacion\": {{id_evaluacion}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/evaluacion/{{id_evaluacion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "evaluacion",
+                "{{id_evaluacion}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "13 CategoriaProducto",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/categoria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "categoria"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/categoria/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "categoria",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/categoria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "categoria"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Snacks\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_categoria}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_categoria\", r.data.idCategoria); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/categoria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "categoria"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Snacks saludables\",\n  \"idCategoria\": {{id_categoria}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/categoria/{{id_categoria}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "categoria",
+                "{{id_categoria}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "14 Producto",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": {\n    \"idCategoria\": 1\n  },\n  \"nombre\": \"Creatina 300g\",\n  \"precio\": 95.0,\n  \"stock\": 10,\n  \"stockMinimo\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_producto}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_producto\", r.data.idProducto); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": {\n    \"idCategoria\": 1\n  },\n  \"nombre\": \"Creatina 300g\",\n  \"precio\": 99.0,\n  \"stock\": 10,\n  \"stockMinimo\": 3,\n  \"idProducto\": {{id_producto}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{id_producto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{id_producto}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "15 Venta",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "venta"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/venta/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "venta",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": {\n    \"idUsuario\": 1\n  },\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"total\": 50.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_venta}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_venta\", r.data.idVenta); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": {\n    \"idUsuario\": 1\n  },\n  \"cliente\": {\n    \"idCliente\": 1\n  },\n  \"total\": 55.0,\n  \"idVenta\": {{id_venta}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/venta/{{id_venta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "venta",
+                "{{id_venta}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "16 DetalleVenta",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/detalleventa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "detalleventa"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/detalleventa/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "detalleventa",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/detalleventa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "detalleventa"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venta\": {\n    \"idVenta\": 1\n  },\n  \"producto\": {\n    \"idProducto\": 2\n  },\n  \"cantidad\": 1,\n  \"precioUnitario\": 35.0,\n  \"subtotal\": 35.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_detalleventa}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_detalleventa\", r.data.idDetalle); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/detalleventa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "detalleventa"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venta\": {\n    \"idVenta\": 1\n  },\n  \"producto\": {\n    \"idProducto\": 2\n  },\n  \"cantidad\": 2,\n  \"precioUnitario\": 35.0,\n  \"subtotal\": 70.0,\n  \"idDetalle\": {{id_detalleventa}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/detalleventa/{{id_detalleventa}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "detalleventa",
+                "{{id_detalleventa}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "17 Torneo",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/torneo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "torneo"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/torneo/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "torneo",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/torneo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "torneo"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Reto Cardio 2027\",\n  \"descripcion\": \"Competencia de resistencia\",\n  \"fecha\": \"2027-02-20\",\n  \"lugar\": \"Sede FORJA Surco\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_torneo}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_torneo\", r.data.idTorneo); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/torneo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "torneo"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Reto Cardio 2027\",\n  \"descripcion\": \"Competencia de resistencia\",\n  \"fecha\": \"2027-02-20\",\n  \"lugar\": \"Sede FORJA Miraflores\",\n  \"idTorneo\": {{id_torneo}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/torneo/{{id_torneo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "torneo",
+                "{{id_torneo}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "18 InscripcionTorneo",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/inscripciontorneo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "inscripciontorneo"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/inscripciontorneo/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "inscripciontorneo",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/inscripciontorneo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "inscripciontorneo"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 2\n  },\n  \"torneo\": {\n    \"idTorneo\": 1\n  },\n  \"entrenador\": {\n    \"idEntrenador\": 1\n  },\n  \"categoria\": \"RX Masculino\",\n  \"sexo\": \"M\",\n  \"pesoMinimo\": 70.0,\n  \"pesoMaximo\": 85.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_inscripciontorneo}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_inscripciontorneo\", r.data.idInscripcion); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/inscripciontorneo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "inscripciontorneo"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"idCliente\": 2\n  },\n  \"torneo\": {\n    \"idTorneo\": 1\n  },\n  \"entrenador\": {\n    \"idEntrenador\": 1\n  },\n  \"categoria\": \"RX Masculino\",\n  \"sexo\": \"M\",\n  \"pesoMinimo\": 70.0,\n  \"pesoMaximo\": 85.0,\n  \"idInscripcion\": {{id_inscripciontorneo}},\n  \"puesto\": 1,\n  \"puntaje\": 95.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/inscripciontorneo/{{id_inscripciontorneo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "inscripciontorneo",
+                "{{id_inscripciontorneo}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "19 Asistencia",
+      "item": [
+        {
+          "name": "Listar todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/asistencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "asistencia"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/asistencia/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "asistencia",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/asistencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "asistencia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"horario\": {\n    \"idHorario\": 1\n  },\n  \"cliente\": {\n    \"idCliente\": 2\n  },\n  \"usuario\": {\n    \"idUsuario\": 1\n  },\n  \"fecha\": \"2026-10-06\",\n  \"estado\": \"RESERVADO\",\n  \"montoPagado\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea el registro y guarda su id en {{id_asistencia}} para usar en PUT y DELETE."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "if (r.data) { pm.collectionVariables.set(\"id_asistencia\", r.data.idAsistencia); }",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/asistencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "asistencia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"horario\": {\n    \"idHorario\": 1\n  },\n  \"cliente\": {\n    \"idCliente\": 2\n  },\n  \"usuario\": {\n    \"idUsuario\": 1\n  },\n  \"fecha\": \"2026-10-06\",\n  \"estado\": \"FALTO\",\n  \"montoPagado\": 0,\n  \"idAsistencia\": {{id_asistencia}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El id va dentro del JSON. Reemplaza el objeto completo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/asistencia/{{id_asistencia}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "asistencia",
+                "{{id_asistencia}}"
+              ]
+            },
+            "description": "Baja logica (estado=false) en tablas con estado; borrado fisico en las demas."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "20 Registros (reglas de negocio)",
+      "item": [
+        {
+          "name": "Registrar membresia + pago",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 4,\n  \"idPlan\": 2,\n  \"fechaInicio\": \"2026-10-02\",\n  \"idTipoPago\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Calcula fechaFin segun el plan y crea el pago automaticamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar venta (descuenta stock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": 1,\n  \"idCliente\": 2,\n  \"items\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 1\n    },\n    {\n      \"idProducto\": 4,\n      \"cantidad\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Crea venta + detalle, calcula el total y descuenta stock. Si falta idUsuario usa el admin logueado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reservar clase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": 6,\n  \"idCliente\": 3,\n  \"idUsuario\": 1,\n  \"fecha\": \"2026-10-02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida dia/fecha, cupo y membresia vigente (clases MEMBRESIA). Estado RESERVADO."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var r = pm.response.json();",
+                  "pm.collectionVariables.set(\"id_reserva\", r.idAsistencia);",
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar ingreso (clase libre, cobra)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": 6,\n  \"idCliente\": 5,\n  \"idUsuario\": 1,\n  \"fecha\": \"2026-10-02\",\n  \"idTipoPago\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "En clases LIBRE cobra precioEntrada y exige idTipoPago. Pasa a ASISTIO y llena horaIngreso."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar falta",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/{{id_reserva}}/falto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "{{id_reserva}}",
+                "falto"
+              ]
+            },
+            "description": "Marca FALTO una reserva (usa el id de la reserva creada arriba)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "21 Consultas",
+      "item": [
+        {
+          "name": "C1 Asistencia de una clase",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/asistencia?idHorario=6&fecha=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "asistencia"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "6"
+                },
+                {
+                  "key": "fecha",
+                  "value": "2026-10-02"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C2 Recaudado de clase libre",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/recaudado-clase?idHorario=6&fecha=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "recaudado-clase"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "6"
+                },
+                {
+                  "key": "fecha",
+                  "value": "2026-10-02"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C3 Recaudado por metodo de pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/recaudado-clase/por-pago?idHorario=6&fecha=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "recaudado-clase",
+                "por-pago"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "6"
+                },
+                {
+                  "key": "fecha",
+                  "value": "2026-10-02"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C4 Cupos disponibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/cupos?idHorario=6&fecha=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "cupos"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "6"
+                },
+                {
+                  "key": "fecha",
+                  "value": "2026-10-02"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C5 Membresias vigentes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-vigentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-vigentes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C6 Membresias por vencer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-por-vencer?dias=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-por-vencer"
+              ],
+              "query": [
+                {
+                  "key": "dias",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C7 Historial de asistencia de un cliente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/cliente/1/historial-asistencia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "cliente",
+                "1",
+                "historial-asistencia"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C8 Productos con stock bajo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/productos-stock-bajo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "productos-stock-bajo"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C9 Ventas por fechas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/ventas?desde=2026-09-01&hasta=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C10 Ingresos totales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/ingresos?desde=2026-01-01&hasta=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "ingresos"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C11 Inscritos de un torneo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/torneo/1/inscritos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "torneo",
+                "1",
+                "inscritos"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C12 Horarios de un entrenador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/entrenador/1/horarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "entrenador",
+                "1",
+                "horarios"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C13 Horarios de una sala",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/sala/1/horarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "sala",
+                "1",
+                "horarios"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C14 Resumen de salas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/salas-resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "salas-resumen"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "22 Reportes (DTO)",
+      "item": [
+        {
+          "name": "Membresias por plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/reporte/membresias-por-plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "reporte",
+                "membresias-por-plan"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asistencia por estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/reporte/asistencia-por-estado?idHorario=6&fecha=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "reporte",
+                "asistencia-por-estado"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "6"
+                },
+                {
+                  "key": "fecha",
+                  "value": "2026-10-02"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ingresos por metodo de pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/reporte/ingresos-por-metodo-pago?desde=2026-01-01&hasta=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "reporte",
+                "ingresos-por-metodo-pago"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-12-31"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clases mas concurridas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/reporte/clases-mas-concurridas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "reporte",
+                "clases-mas-concurridas"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Productos mas vendidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/reporte/productos-mas-vendidos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "reporte",
+                "productos-mas-vendidos"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta correcta\", function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

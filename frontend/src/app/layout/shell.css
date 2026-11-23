@@ -1,0 +1,97 @@
+:host { display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar {
+  height: 56px;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.marca {
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #fff;
+  text-decoration: none;
+}
+.usuario { margin-left: auto; font-size: 14px; }
+.usuario .rol { color: #9ca3af; }
+.usuario .nombre { font-weight: 600; }
+
+.cuerpo { flex: 1; display: flex; }
+
+.sidebar {
+  width: 236px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 0;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+}
+.sidebar ul { list-style: none; margin: 0; padding: 0; }
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  color: #374151;
+  text-decoration: none;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+}
+.sidebar a:hover { background: var(--bg); color: var(--text); }
+.sidebar a.activo { border-left-color: var(--primary); background: var(--primary-soft); color: var(--text); font-weight: 700; }
+.menu { overflow-y: auto; }
+.grupo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 14px 20px 4px;
+}
+.grupo:first-child { padding-top: 2px; }
+.salir {
+  margin: 0 12px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 500;
+}
+.salir:hover { color: var(--bad); border-color: #fca5a5; }
+
+.contenido { flex: 1; min-width: 0; padding: 26px 32px 40px; max-width: 1280px; }
+
+.hamburguesa { display: none; background: none; border: none; cursor: pointer; padding: 6px; }
+.hamburguesa span { display: block; width: 20px; height: 2px; background: #fff; margin: 4px 0; }
+.velo { display: none; }
+
+@media (max-width: 860px) {
+  .hamburguesa { display: block; }
+  .usuario .rol { display: none; }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 56px;
+    z-index: 15;
+    transform: translateX(-100%);
+    transition: transform 0.2s;
+  }
+  .sidebar.abierto { transform: none; box-shadow: 4px 0 18px rgba(0, 0, 0, 0.15); }
+  .velo { display: block; position: fixed; inset: 56px 0 0 0; background: rgba(0, 0, 0, 0.25); z-index: 10; }
+  .contenido { padding: 20px 16px 32px; }
+}

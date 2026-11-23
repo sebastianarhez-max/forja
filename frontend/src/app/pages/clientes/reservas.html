@@ -1,0 +1,72 @@
+<section class="card">
+  <h2 class="card-title">Consultar cupos</h2>
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 2">
+      <label for="clase">Clase</label>
+      <select id="clase" [ngModel]="idHorario()" (ngModelChange)="elegirClase($event)">
+        <option [ngValue]="null" disabled>Seleccione una clase</option>
+        @for (h of clases(); track h.idHorario) {
+          <option [ngValue]="h.idHorario">{{ texto(h) }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="fecha">Fecha</label>
+      <input id="fecha" type="date" [ngModel]="fecha()" (ngModelChange)="cambiarFecha($event)" />
+    </div>
+  </div>
+
+  @if (fechaIncorrecta()) {
+    <div class="alert warn">{{ fechaIncorrecta() }}</div>
+  }
+
+  <div class="form-actions" style="margin-bottom: 14px">
+    <button class="btn btn-outline" type="button" (click)="consultarCupos()">Consultar cupos</button>
+    @if (clase()) {
+      <button class="btn btn-link" type="button" (click)="verAsistentes()">Ver asistentes de esta clase →</button>
+    }
+  </div>
+
+  @if (cupos(); as c) {
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Cupo máximo</div><div class="stat-value">{{ c.cupoMaximo }}</div></div>
+      <div class="stat"><div class="stat-label">Ocupados</div><div class="stat-value">{{ c.ocupados }}</div></div>
+      <div class="stat" [class.dark]="c.disponibles > 0" [class.orange]="c.disponibles <= 0">
+        <div class="stat-label">Disponibles</div><div class="stat-value">{{ c.disponibles }}</div>
+      </div>
+    </div>
+  }
+</section>
+
+<section class="card">
+  <h2 class="card-title">Reservar cupo</h2>
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 2">
+      <label for="cliente">Socio</label>
+      <select id="cliente" [ngModel]="idCliente()" (ngModelChange)="idCliente.set($event)">
+        <option [ngValue]="null" disabled>Seleccione un socio</option>
+        @for (c of clientes(); track c.idCliente) {
+          <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }} · DNI {{ c.dni || '—' }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="usuario">Registrado por</label>
+      <input id="usuario" [value]="usuario" readonly />
+    </div>
+  </div>
+
+  @if (clase() && idCliente()) {
+    @if (clase()!.tipoAcceso === 'LIBRE') {
+      <div class="alert">Clase libre: no exige membresía. El cobro de S/ {{ clase()!.precioEntrada }} se registra al ingresar.</div>
+    } @else if (membresiaVigente(); as m) {
+      <div class="alert ok">Membresía {{ m.plan.nombre }} vigente hasta el {{ m.fechaFin | fecha }}. Clase de membresía: monto S/ 0.</div>
+    } @else {
+      <div class="alert bad">El socio no tiene una membresía vigente para el {{ fecha() | fecha }}. Puedes contratarla en Membresías.</div>
+    }
+  }
+
+  <button class="btn btn-primary" type="button" (click)="reservar()" [disabled]="reservando() || !idHorario() || !idCliente()">
+    Reservar cupo
+  </button>
+</section>

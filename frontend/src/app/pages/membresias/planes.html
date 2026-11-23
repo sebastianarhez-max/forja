@@ -1,0 +1,65 @@
+<form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <h2 class="card-title">{{ editandoId() ? 'Editar plan' : 'Registrar plan' }}</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" formControlName="nombre" placeholder="Ej. Mensual" />
+      <app-campo-error [control]="form.controls.nombre" />
+    </div>
+    <div class="field">
+      <label for="descripcion">Descripción</label>
+      <input id="descripcion" formControlName="descripcion" placeholder="Ej. Acceso por 30 días" />
+    </div>
+    <div class="field">
+      <label for="duracion">Duración (días)</label>
+      <input id="duracion" type="number" min="1" formControlName="duracionDias" />
+      <app-campo-error [control]="form.controls.duracionDias" />
+    </div>
+    <div class="field">
+      <label for="precio">Precio (S/)</label>
+      <input id="precio" type="number" min="0" step="0.5" formControlName="precio" />
+      <app-campo-error [control]="form.controls.precio" />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" formControlName="estado">
+        <option [ngValue]="true">Activo</option>
+        <option [ngValue]="false">Inactivo</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ editandoId() ? 'Guardar cambios' : 'Registrar plan' }}</button>
+    @if (editandoId()) {
+      <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<section class="card">
+  <h2 class="card-title">Planes registrados</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Plan</th><th>Descripción</th><th class="num">Duración</th><th class="num">Precio</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        @for (p of lista(); track p.idPlan) {
+          <tr [class.inactivo]="!p.estado">
+            <td class="strong">{{ p.nombre }}</td>
+            <td class="wrap">{{ p.descripcion }}</td>
+            <td class="num">{{ p.duracionDias }} días</td>
+            <td class="num">{{ p.precio | soles }}</td>
+            <td><span class="badge" [class.badge-ok]="p.estado" [class.badge-bad]="!p.estado">{{ p.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="acciones">
+                <button class="btn btn-outline btn-sm" type="button" (click)="editar(p)">Editar</button>
+                <button class="btn btn-sm" [class.btn-danger]="p.estado" [class.btn-outline]="!p.estado" type="button" (click)="cambiarEstado(p)">{{ p.estado ? 'Desactivar' : 'Activar' }}</button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="vacio">No hay planes registrados</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,47 @@
+<section class="card">
+  <h2 class="card-title">Recaudado por clase</h2>
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 2">
+      <label for="clase">Clase</label>
+      <select id="clase" [ngModel]="idHorario()" (ngModelChange)="elegirClase($event)">
+        @for (h of clases(); track h.idHorario) {
+          <option [ngValue]="h.idHorario">{{ texto(h) }}{{ h.tipoAcceso === 'LIBRE' ? ' · libre' : '' }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="fecha">Fecha</label>
+      <input id="fecha" type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" />
+    </div>
+  </div>
+  <button class="btn btn-outline" type="button" (click)="consultar()" style="margin-bottom: 14px">Consultar</button>
+
+  @if (consultado()) {
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Personas ingresadas</div><div class="stat-value">{{ resumen()?.personasIngresaron ?? 0 }}</div></div>
+      <div class="stat dark"><div class="stat-label">Total recaudado</div><div class="stat-value">{{ (resumen()?.totalRecaudado ?? 0) | soles }}</div></div>
+    </div>
+    <div class="alert">Las reservas y las faltas no suman a la recaudación: solo cuentan las personas que ingresaron.</div>
+  }
+</section>
+
+@if (consultado()) {
+  <section class="card">
+    <h2 class="card-title">Desglose por método de pago</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Método</th><th class="num">Cantidad</th><th class="num">Total</th></tr></thead>
+        <tbody>
+          @for (d of desglose(); track d.tipoPago) {
+            <tr><td class="strong">{{ d.tipoPago }}</td><td class="num">{{ d.cantidad }}</td><td class="num">{{ d.total | soles }}</td></tr>
+          } @empty {
+            <tr><td colspan="3" class="vacio">Sin cobros registrados para esta clase y fecha</td></tr>
+          }
+        </tbody>
+        @if (desglose().length) {
+          <tfoot><tr><td>Total</td><td class="num"></td><td class="num">{{ totalDesglose() | soles }}</td></tr></tfoot>
+        }
+      </table>
+    </div>
+  </section>
+}

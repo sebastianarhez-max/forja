@@ -1,0 +1,7 @@
+.rutinas { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+.rutinas .card { margin-bottom: 0; }
+.rutina-nombre { font-size: 20px; }
+.rutina.archivada { opacity: 0.6; }
+.ejercicios td { padding: 6px 8px; }
+.input.corto { width: 90px; }
+.check { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
