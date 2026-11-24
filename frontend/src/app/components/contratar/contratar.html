@@ -1,0 +1,65 @@
+<section class="card">
+  <h2 class="card-title">Contratar membresía y registrar pago</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="cliente">Socio</label>
+      <select id="cliente" [ngModel]="idCliente()" (ngModelChange)="idCliente.set($event)">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (c of clientes(); track c.idCliente) {
+          <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="plan">Plan</label>
+      <select id="plan" [ngModel]="idPlan()" (ngModelChange)="idPlan.set($event)">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (p of planes(); track p.idPlan) {
+          <option [ngValue]="p.idPlan">{{ p.nombre }} · {{ p.duracionDias }} días · {{ p.precio | soles }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="inicio">Fecha de inicio</label>
+      <input id="inicio" type="date" [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" />
+    </div>
+    <div class="field">
+      <label for="pago">Método de pago</label>
+      <select id="pago" [ngModel]="idTipoPago()" (ngModelChange)="idTipoPago.set($event)">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (t of tiposPago(); track t.idTipoPago) {
+          <option [ngValue]="t.idTipoPago">{{ t.nombre }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (plan(); as p) {
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Fecha de fin</div><div class="stat-value">{{ fechaFin() | fecha }}</div></div>
+      <div class="stat dark"><div class="stat-label">Monto a pagar</div><div class="stat-value">{{ p.precio | soles }}</div></div>
+    </div>
+    <div class="alert">Concepto del pago: Pago membresía {{ p.nombre }}. Si no eliges fecha de inicio, se usa hoy.</div>
+  }
+  @if (membresiaActual(); as m) {
+    <div class="alert warn">Este socio ya tiene la membresía {{ m.plan.nombre }} activa hasta el {{ m.fechaFin | fecha }}. Revisa la fecha de inicio para no superponerlas.</div>
+  }
+
+  <button class="btn btn-primary" type="button" (click)="contratar()" [disabled]="guardando()">Contratar y registrar pago</button>
+</section>
+
+@if (resultado(); as r) {
+  <section class="card">
+    <h2 class="card-title">Membresía registrada</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <tbody>
+          <tr><td class="muted">Cliente</td><td class="strong">{{ r.membresia.cliente.nombres }} {{ r.membresia.cliente.apellidos }}</td></tr>
+          <tr><td class="muted">Plan</td><td>{{ r.membresia.plan.nombre }} ({{ r.membresia.plan.duracionDias }} días)</td></tr>
+          <tr><td class="muted">Vigencia</td><td>{{ r.membresia.fechaInicio | fecha }} al {{ r.membresia.fechaFin | fecha }}</td></tr>
+          <tr><td class="muted">Pago</td><td>{{ r.pago.monto | soles }} · {{ r.pago.tipoPago.nombre }} · {{ r.pago.concepto }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

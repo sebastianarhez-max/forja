@@ -1,0 +1,97 @@
+<section class="card">
+  <div class="form-actions">
+    <div class="field" style="min-width: 320px">
+      <label for="socio">Socio</label>
+      <select id="socio" [ngModel]="idCliente()" (ngModelChange)="elegir($event)">
+        <option [ngValue]="null" disabled>Seleccione un socio</option>
+        @for (c of socios(); track c.idCliente) {
+          <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }}</option>
+        }
+      </select>
+    </div>
+    @if (socio()) {
+      <label class="check" style="align-self: flex-end; margin-bottom: 8px">
+        <input type="checkbox" [ngModel]="verInactivas()" (ngModelChange)="verInactivas.set($event)" /> Mostrar rutinas archivadas
+      </label>
+    }
+  </div>
+</section>
+
+@if (socio(); as s) {
+  <form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2 class="card-title">{{ editando() ? 'Editar rutina' : 'Asignar rutina a ' + s.nombres }}</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="entrenador">Entrenador</label>
+        <select id="entrenador" formControlName="idEntrenador">
+          <option [ngValue]="null" disabled>Seleccione</option>
+          @for (e of entrenadores(); track e.idEntrenador) {
+            <option [ngValue]="e.idEntrenador">{{ e.nombres }} {{ e.apellidos }}</option>
+          }
+        </select>
+        <app-campo-error [control]="form.controls.idEntrenador" />
+      </div>
+      <div class="field">
+        <label for="nombre">Nombre de la rutina</label>
+        <input id="nombre" formControlName="nombre" placeholder="Ej. Fuerza tren inferior" />
+        <app-campo-error [control]="form.controls.nombre" />
+      </div>
+      <div class="field">
+        <label for="objetivo">Objetivo</label>
+        <input id="objetivo" formControlName="objetivo" placeholder="Ej. Ganar fuerza" />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table ejercicios" formArrayName="ejercicios">
+        <thead><tr><th>Ejercicio</th><th>Series</th><th>Repeticiones</th><th>Descanso (seg)</th><th></th></tr></thead>
+        <tbody>
+          @for (fila of ejercicios.controls; track fila; let i = $index) {
+            <tr [formGroupName]="i">
+              <td><input class="input" formControlName="nombre" placeholder="Ej. Sentadilla" [attr.aria-label]="'Ejercicio ' + (i + 1)" /></td>
+              <td><input class="input corto" type="number" min="1" formControlName="series" aria-label="Series" /></td>
+              <td><input class="input corto" type="number" min="1" formControlName="repeticiones" aria-label="Repeticiones" /></td>
+              <td><input class="input corto" type="number" min="0" step="15" formControlName="descansoSeg" aria-label="Descanso" /></td>
+              <td><button class="btn btn-link btn-sm" type="button" (click)="quitarEjercicio(i)" [disabled]="ejercicios.length === 1">Quitar</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="form-actions" style="margin-top: 12px">
+      <button class="btn btn-outline" type="button" (click)="agregarEjercicio()">+ Agregar ejercicio</button>
+      <button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ editando() ? 'Guardar cambios' : 'Asignar rutina' }}</button>
+      @if (editando()) {
+        <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+      }
+    </div>
+  </form>
+
+  <div class="rutinas">
+    @for (r of rutinas(); track r.idRutina) {
+      <article class="card rutina" [class.archivada]="!r.estado">
+        <div class="card-head">
+          <div>
+            <h3 class="rutina-nombre">{{ r.nombre }}</h3>
+            <div class="small muted">{{ r.objetivo || 'Sin objetivo' }} · {{ r.entrenador.nombres }} {{ r.entrenador.apellidos }} · {{ r.fechaCreacion | fecha }}</div>
+          </div>
+          <span class="badge" [class.badge-ok]="r.estado" [class.badge-gray]="!r.estado">{{ r.estado ? 'Vigente' : 'Archivada' }}</span>
+        </div>
+        <table class="table">
+          <thead><tr><th>Ejercicio</th><th class="num">Series</th><th class="num">Reps.</th><th class="num">Descanso</th></tr></thead>
+          <tbody>
+            @for (e of r.ejercicios; track $index) {
+              <tr><td>{{ e.nombre }}</td><td class="num">{{ e.series }}</td><td class="num">{{ e.repeticiones }}</td><td class="num">{{ e.descansoSeg }} s</td></tr>
+            }
+          </tbody>
+        </table>
+        <div class="acciones" style="margin-top: 12px">
+          <button class="btn btn-outline btn-sm" type="button" (click)="editar(r)">Editar</button>
+          <button class="btn btn-sm" [class.btn-danger]="r.estado" [class.btn-outline]="!r.estado" type="button" (click)="cambiarEstado(r)">{{ r.estado ? 'Archivar' : 'Reactivar' }}</button>
+        </div>
+      </article>
+    } @empty {
+      <section class="card"><p class="muted" style="margin: 0">{{ s.nombres }} todavía no tiene rutinas asignadas.</p></section>
+    }
+  </div>
+}

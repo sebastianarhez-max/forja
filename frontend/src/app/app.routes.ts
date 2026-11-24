@@ -1,42 +1,42 @@
 import { Routes } from '@angular/router';
-import { Login } from './auth/login';
-import { Seccion } from './layout/seccion';
-import { Shell } from './layout/shell';
+import { LoginComponent } from './auth/login.component';
+import { Seccion } from './components/seccion/seccion';
+import { MenuComponent } from './menu/menu.component';
 import { authGuard, loginGuard } from './security/auth.guard';
 // Inicio y reportes
-import { Inicio } from './pages/inicio/inicio';
-import { Reportes } from './pages/reportes/reportes';
+import { IndexComponent } from './index/index.component';
+import { Reportes } from './components/reportes/reportes';
 // Clases y horarios (HU01)
-import { Actividades } from './pages/clases/actividades';
-import { Entrenadores } from './pages/clases/entrenadores';
-import { Programacion } from './pages/clases/programacion';
+import { Actividades } from './components/actividades/actividades';
+import { Entrenadores } from './components/entrenadores/entrenadores';
+import { Programacion } from './components/programacion/programacion';
 // Salas
-import { Salas } from './pages/salas/salas';
+import { Salas } from './components/salas/salas';
 // Socios, reservas y asistencia (HU02)
-import { Asistentes } from './pages/clientes/asistentes';
-import { Clientes } from './pages/clientes/clientes';
-import { Reservas } from './pages/clientes/reservas';
+import { Asistentes } from './components/asistentes/asistentes';
+import { Clientes } from './components/clientes/clientes';
+import { Reservas } from './components/reservas/reservas';
 // Clases libres: cobro y recaudación (HU03)
-import { Cobro } from './pages/cobro/cobro';
-import { Recaudacion } from './pages/cobro/recaudacion';
+import { Cobro } from './components/cobro/cobro';
+import { Recaudacion } from './components/recaudacion/recaudacion';
 // Membresías (HU04)
-import { Contratar } from './pages/membresias/contratar';
-import { Planes } from './pages/membresias/planes';
-import { PorVencer } from './pages/membresias/por-vencer';
-import { Vigentes } from './pages/membresias/vigentes';
+import { Contratar } from './components/contratar/contratar';
+import { Planes } from './components/planes/planes';
+import { PorVencer } from './components/por-vencer/por-vencer';
+import { Vigentes } from './components/vigentes/vigentes';
 // Tienda: inventario y ventas (HU05)
-import { Historial } from './pages/inventario/historial';
-import { Productos } from './pages/inventario/productos';
-import { Reposicion } from './pages/inventario/reposicion';
-import { StockBajo } from './pages/inventario/stock-bajo';
-import { Venta } from './pages/inventario/venta';
+import { Historial } from './components/historial/historial';
+import { Productos } from './components/productos/productos';
+import { Reposicion } from './components/reposicion/reposicion';
+import { StockBajo } from './components/stock-bajo/stock-bajo';
+import { Venta } from './components/venta/venta';
 // Socios: seguimiento físico y rutinas
-import { Evaluaciones } from './pages/clientes/evaluaciones';
-import { Rutinas } from './pages/clientes/rutinas';
+import { Evaluaciones } from './components/evaluaciones/evaluaciones';
+import { Rutinas } from './components/rutinas/rutinas';
 // Torneos y configuración
-import { Torneos } from './pages/torneos/torneos';
-import { MetodosPago } from './pages/configuracion/metodos-pago';
-import { Usuarios } from './pages/configuracion/usuarios';
+import { Torneos } from './components/torneos/torneos';
+import { MetodosPago } from './components/metodos-pago/metodos-pago';
+import { Usuarios } from './components/usuarios/usuarios';
 
 /**
  * Rutas del sistema. Cada módulo usa el componente Seccion (título + pestañas).
@@ -45,14 +45,14 @@ import { Usuarios } from './pages/configuracion/usuarios';
  *   HU04 -> /membresias    HU05 -> /tienda
  */
 export const routes: Routes = [
-  { path: 'login', component: Login, canActivate: [loginGuard], title: 'FORJA · Iniciar sesión' },
+  { path: 'login', component: LoginComponent, canActivate: [loginGuard], title: 'FORJA · Iniciar sesión' },
   {
     path: '',
-    component: Shell,
+    component: MenuComponent,
     canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
-      { path: 'inicio', component: Inicio, title: 'FORJA · Inicio' },
+      { path: 'inicio', component: IndexComponent, title: 'FORJA · Inicio' },
 
       // ---------------------------------------------------------------- día a día
       {

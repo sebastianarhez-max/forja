@@ -1,0 +1,84 @@
+<section class="card">
+  <h2 class="card-title">Asistentes de la clase</h2>
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 2">
+      <label for="clase">Clase</label>
+      <select id="clase" [ngModel]="idHorario()" (ngModelChange)="elegirClase($event)">
+        <option [ngValue]="null" disabled>Seleccione una clase</option>
+        @for (h of clases(); track h.idHorario) {
+          <option [ngValue]="h.idHorario">{{ texto(h) }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="fecha">Fecha</label>
+      <input id="fecha" type="date" [ngModel]="fecha()" (ngModelChange)="cambiarFecha($event)" />
+    </div>
+  </div>
+
+  @if (cargado()) {
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Reservados</div><div class="stat-value">{{ resumen().reservados }}</div></div>
+      <div class="stat"><div class="stat-label">Asistieron</div><div class="stat-value">{{ resumen().asistieron }}</div></div>
+      <div class="stat"><div class="stat-label">Faltaron</div><div class="stat-value">{{ resumen().faltaron }}</div></div>
+      @if (cupos(); as c) {
+        <div class="stat dark"><div class="stat-label">Cupos disponibles</div><div class="stat-value">{{ c.disponibles }} / {{ c.cupoMaximo }}</div></div>
+      }
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Socio</th><th>Estado</th><th>Hora de ingreso</th><th class="num">Monto</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          @for (a of asistentes(); track a.idAsistencia) {
+            <tr>
+              <td class="strong">{{ a.nombres }} {{ a.apellidos }}</td>
+              <td>
+                <span class="badge" [class.badge-warn]="a.estado === 'RESERVADO'" [class.badge-ok]="a.estado === 'ASISTIO'" [class.badge-bad]="a.estado === 'FALTO'">{{ a.estado | estadoAsistencia }}</span>
+              </td>
+              <td>{{ a.horaIngreso | hora }}</td>
+              <td class="num">{{ a.montoPagado | soles }}</td>
+              <td>
+                @switch (a.estado) {
+                  @case ('RESERVADO') {
+                    <div class="acciones">
+                      <button class="btn btn-outline btn-sm" type="button" (click)="registrarIngreso(a.idCliente)">Registrar ingreso</button>
+                      <button class="btn btn-danger btn-sm" type="button" (click)="marcarFalta(a)">Marcar falta</button>
+                    </div>
+                  }
+                  @case ('ASISTIO') { <span class="muted small">Ya ingresó</span> }
+                  @case ('FALTO') { <span class="muted small">Cupo liberado</span> }
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="vacio">Nadie ha reservado ni ingresado a esta clase en esa fecha</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (cargado()) {
+  <section class="card">
+    <h2 class="card-title">Ingreso sin reserva</h2>
+    <p class="card-sub">
+      Para socios que llegan sin haber reservado. Se valida el cupo
+      @if (clase()?.tipoAcceso === 'LIBRE') { y se cobra la entrada. } @else { y la membresía vigente. }
+    </p>
+    <div class="form-actions">
+      <select class="input" style="max-width: 360px" [ngModel]="idClienteSinReserva()" (ngModelChange)="idClienteSinReserva.set($event)" aria-label="Cliente">
+        <option [ngValue]="null" disabled>Seleccione un socio</option>
+        @for (c of clientesDisponibles(); track c.idCliente) {
+          <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }}</option>
+        }
+      </select>
+      <button class="btn btn-primary" type="button" [disabled]="!idClienteSinReserva()" (click)="registrarIngreso(idClienteSinReserva()!)">
+        Registrar ingreso
+      </button>
+    </div>
+  </section>
+}

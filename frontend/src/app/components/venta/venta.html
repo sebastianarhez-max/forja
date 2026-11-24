@@ -1,0 +1,86 @@
+<section class="card">
+  <h2 class="card-title">Nueva venta</h2>
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 2">
+      <label for="cliente">Socio <span class="opc">(opcional)</span></label>
+      <select id="cliente" [ngModel]="idCliente()" (ngModelChange)="idCliente.set($event)">
+        <option [ngValue]="null">Público general</option>
+        @for (c of clientes(); track c.idCliente) {
+          <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="vendedor">Vendedor</label>
+      <input id="vendedor" [value]="vendedor" readonly />
+    </div>
+  </div>
+
+  <div class="form-grid agregar">
+    <div class="field" style="grid-column: span 2">
+      <label for="prod">Producto</label>
+      <select id="prod" [ngModel]="idProductoNuevo()" (ngModelChange)="idProductoNuevo.set($event)">
+        <option [ngValue]="null" disabled>Seleccione un producto</option>
+        @for (p of disponibles(); track p.idProducto) {
+          <option [ngValue]="p.idProducto" [disabled]="p.stock === 0">{{ p.nombre }} · {{ p.precio | soles }} · stock {{ p.stock }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="cant">Cantidad</label>
+      <input id="cant" type="number" min="1" [ngModel]="cantidadNueva()" (ngModelChange)="cantidadNueva.set($event)" />
+    </div>
+    <div class="field" style="justify-content: flex-end">
+      <button class="btn btn-outline" type="button" (click)="agregar()">Agregar producto</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Producto</th><th class="num">Precio</th><th class="num">Cantidad</th><th class="num">Subtotal</th><th></th></tr></thead>
+      <tbody>
+        @for (l of lineas(); track l.producto.idProducto) {
+          <tr>
+            <td class="strong">{{ l.producto.nombre }}</td>
+            <td class="num">{{ l.producto.precio | soles }}</td>
+            <td class="num">
+              <input class="input cant" type="number" min="1" [max]="l.producto.stock" [ngModel]="l.cantidad" (ngModelChange)="cambiarCantidad(l, $event)" />
+            </td>
+            <td class="num">{{ l.producto.precio * l.cantidad | soles }}</td>
+            <td><button class="btn btn-danger btn-sm" type="button" (click)="quitar(l)">Quitar</button></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="vacio">Agrega productos a la venta</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="stats" style="margin-top: 16px">
+    <div class="stat dark"><div class="stat-label">Total</div><div class="stat-value">{{ total() | soles }}</div></div>
+  </div>
+  <button class="btn btn-primary" type="button" (click)="registrar()" [disabled]="guardando() || lineas().length === 0">Registrar venta</button>
+</section>
+
+@if (ultimaVenta(); as v) {
+  <section class="card">
+    <h2 class="card-title">Venta N.° {{ v.venta.idVenta }} registrada</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Producto</th><th class="num">Cantidad</th><th class="num">P. unitario</th><th class="num">Subtotal</th><th class="num">Stock restante</th></tr></thead>
+        <tbody>
+          @for (d of v.detalles; track d.idDetalle) {
+            <tr>
+              <td>{{ d.producto.nombre }}</td>
+              <td class="num">{{ d.cantidad }}</td>
+              <td class="num">{{ d.precioUnitario | soles }}</td>
+              <td class="num">{{ d.subtotal | soles }}</td>
+              <td class="num">{{ d.producto.stock }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot><tr><td>Total</td><td></td><td></td><td class="num">{{ v.venta.total | soles }}</td><td></td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+}

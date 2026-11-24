@@ -9,7 +9,7 @@ import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from 
 import { registerLocaleData } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
 import { routes } from './app.routes';
-import { authInterceptor } from './security/auth.interceptor';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 registerLocaleData(localeEsPe);
 

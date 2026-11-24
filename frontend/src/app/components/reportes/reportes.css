@@ -1,0 +1,17 @@
+.sub { font-size: 17px; margin: 18px 0 8px; }
+.barras { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.fila { display: grid; grid-template-columns: 170px 1fr 170px; align-items: center; gap: 12px; font-size: 14px; }
+.et { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pista { background: var(--gray-bg); border-radius: 4px; height: 14px; overflow: hidden; }
+.b { height: 100%; background: var(--primary); border-radius: 4px; }
+.b.oscuro { background: var(--navy); }
+.val { font-variant-numeric: tabular-nums; }
+.composicion { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--gray-bg); margin-bottom: 6px; }
+.seg.s1 { background: var(--navy); }
+.seg.s2 { background: var(--primary); }
+.seg.s3 { background: #f59e0b; }
+@media (max-width: 700px) { .fila { grid-template-columns: 110px 1fr; } .val { grid-column: 2; } }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
+.dot.s1 { background: var(--navy); }
+.dot.s2 { background: var(--primary); }
+.dot.s3 { background: #f59e0b; }

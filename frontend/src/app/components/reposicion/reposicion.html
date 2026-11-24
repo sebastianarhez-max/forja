@@ -1,0 +1,33 @@
+<section class="card">
+  <h2 class="card-title">Reponer stock</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="prod">Producto</label>
+      <select id="prod" [ngModel]="idProducto()" (ngModelChange)="idProducto.set($event)">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (p of productos(); track p.idProducto) {
+          <option [ngValue]="p.idProducto">{{ p.nombre }}{{ p.stock <= p.stockMinimo ? ' ⚠' : '' }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="actual">Stock actual</label>
+      <input id="actual" [value]="producto()?.stock ?? ''" readonly />
+    </div>
+    <div class="field">
+      <label for="cant">Cantidad a reponer</label>
+      <input id="cant" type="number" min="1" [ngModel]="cantidad()" (ngModelChange)="cantidad.set($event)" placeholder="Ej. 20" />
+    </div>
+    <div class="field">
+      <label for="final">Stock final a guardar</label>
+      <input id="final" [value]="producto() ? stockFinal() : ''" readonly />
+    </div>
+  </div>
+  @if (producto(); as p) {
+    <div class="alert">
+      Se guarda el stock final, no se suma solo: stock {{ p.stock }} + reposición {{ cantidad() || 0 }} = {{ stockFinal() }}.
+      Stock mínimo del producto: {{ p.stockMinimo }}.
+    </div>
+  }
+  <button class="btn btn-primary" type="button" (click)="guardar()" [disabled]="guardando()">Guardar stock</button>
+</section>

@@ -1,0 +1,91 @@
+<div class="page-code">Gestión</div>
+<h1 class="page-title">Reportes</h1>
+<p class="page-sub">Membresías, ingresos, clases y productos para la toma de decisiones.</p>
+
+<section class="card">
+  <div class="card-head">
+    <div>
+      <h2 class="card-title">Ingresos del período</h2>
+      <p class="card-sub">Pagos de membresías + ventas de la tienda + cobros de clases libres</p>
+    </div>
+    <div class="form-actions" style="align-items: flex-end">
+      <div class="field"><label for="desde">Desde</label><input id="desde" type="date" [ngModel]="desde()" (ngModelChange)="desde.set($event)" /></div>
+      <div class="field"><label for="hasta">Hasta</label><input id="hasta" type="date" [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" /></div>
+      <button class="btn btn-outline" type="button" (click)="consultarIngresos()">Consultar</button>
+    </div>
+  </div>
+
+  @if (ingresos(); as i) {
+    <div class="stats">
+      <div class="stat"><div class="stat-label"><i class="dot s1"></i>Membresías ({{ porcentaje(i.membresias) }}%)</div><div class="stat-value">{{ i.membresias | soles }}</div></div>
+      <div class="stat"><div class="stat-label"><i class="dot s2"></i>Tienda ({{ porcentaje(i.ventasTienda) }}%)</div><div class="stat-value">{{ i.ventasTienda | soles }}</div></div>
+      <div class="stat"><div class="stat-label"><i class="dot s3"></i>Clases libres ({{ porcentaje(i.clasesLibres) }}%)</div><div class="stat-value">{{ i.clasesLibres | soles }}</div></div>
+      <div class="stat dark"><div class="stat-label">Total</div><div class="stat-value">{{ i.total | soles }}</div></div>
+    </div>
+    <div class="composicion">
+      <div class="seg s1" [style.width.%]="porcentaje(i.membresias)" title="Membresías"></div>
+      <div class="seg s2" [style.width.%]="porcentaje(i.ventasTienda)" title="Tienda"></div>
+      <div class="seg s3" [style.width.%]="porcentaje(i.clasesLibres)" title="Clases libres"></div>
+    </div>
+  }
+
+  <h3 class="sub">Pagos de membresías por método de pago</h3>
+  <div class="barras">
+    @for (b of barrasMetodo(); track b.etiqueta) {
+      <div class="fila">
+        <span class="et">{{ b.etiqueta }}</span>
+        <div class="pista"><div class="b" [style.width.%]="ancho(barrasMetodo(), b)"></div></div>
+        <span class="val">{{ b.valor | soles }} <span class="muted small">· {{ b.detalle }}</span></span>
+      </div>
+    } @empty {
+      <p class="muted">Sin pagos en el período</p>
+    }
+  </div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2 class="card-title">Membresías activas por plan</h2>
+    <div class="barras">
+      @for (b of barrasPlan(); track b.etiqueta) {
+        <div class="fila">
+          <span class="et">{{ b.etiqueta }}</span>
+          <div class="pista"><div class="b oscuro" [style.width.%]="ancho(barrasPlan(), b)"></div></div>
+          <span class="val">{{ b.valor }}</span>
+        </div>
+      } @empty {
+        <p class="muted">Sin datos</p>
+      }
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-title">Clases más concurridas</h2>
+    <div class="barras">
+      @for (b of barrasClases(); track b.etiqueta) {
+        <div class="fila">
+          <span class="et">{{ b.etiqueta }}</span>
+          <div class="pista"><div class="b oscuro" [style.width.%]="ancho(barrasClases(), b)"></div></div>
+          <span class="val">{{ b.valor }} ingresos</span>
+        </div>
+      } @empty {
+        <p class="muted">Sin asistencias registradas</p>
+      }
+    </div>
+  </section>
+</div>
+
+<section class="card" style="margin-top: 20px">
+  <h2 class="card-title">Productos más vendidos</h2>
+  <div class="barras">
+    @for (b of barrasProductos(); track b.etiqueta) {
+      <div class="fila">
+        <span class="et">{{ b.etiqueta }}</span>
+        <div class="pista"><div class="b" [style.width.%]="ancho(barrasProductos(), b)"></div></div>
+        <span class="val">{{ b.valor }} u. <span class="muted small">· {{ b.detalle }}</span></span>
+      </div>
+    } @empty {
+      <p class="muted">Sin ventas registradas</p>
+    }
+  </div>
+</section>

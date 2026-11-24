@@ -1,0 +1,165 @@
+<form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <h2 class="card-title">{{ editandoId() ? 'Editar clase' : 'Programar clase' }}</h2>
+  <p class="card-sub">Relaciona una actividad, un entrenador y una sala. Usa "Fecha específica" solo para clases de un día puntual.</p>
+
+  <div class="form-grid">
+    <div class="field">
+      <label for="actividad">Actividad</label>
+      <select id="actividad" formControlName="idActividad">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (a of actividadesActivas(); track a.idActividad) {
+          <option [ngValue]="a.idActividad">{{ a.nombre }}</option>
+        }
+      </select>
+      <app-campo-error [control]="form.controls.idActividad" />
+    </div>
+    <div class="field">
+      <label for="entrenador">Entrenador</label>
+      <select id="entrenador" formControlName="idEntrenador">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (e of entrenadoresActivos(); track e.idEntrenador) {
+          <option [ngValue]="e.idEntrenador">{{ e.nombres }} {{ e.apellidos }}</option>
+        }
+      </select>
+      <app-campo-error [control]="form.controls.idEntrenador" />
+    </div>
+    <div class="field">
+      <label for="sala">Sala</label>
+      <select id="sala" formControlName="idSala">
+        <option [ngValue]="null">Sin sala asignada</option>
+        @for (s of salasActivas(); track s.idSala) {
+          <option [ngValue]="s.idSala">{{ s.nombre }} (aforo {{ s.capacidad }})</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="dia">Día</label>
+      <select id="dia" formControlName="dia">
+        @for (d of dias; track d) {
+          <option [ngValue]="d">{{ d | dia }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="fecha">Fecha específica <span class="opc">(opcional)</span></label>
+      <input id="fecha" type="date" formControlName="fecha" />
+    </div>
+    <div class="field">
+      <label for="ini">Hora inicio</label>
+      <input id="ini" type="time" formControlName="horaInicio" />
+      <app-campo-error [control]="form.controls.horaInicio" />
+    </div>
+    <div class="field">
+      <label for="fin">Hora fin</label>
+      <input id="fin" type="time" formControlName="horaFin" />
+      <app-campo-error [control]="form.controls.horaFin" />
+      @if (form.hasError('horas') && form.controls.horaFin.touched) {
+        <small class="campo-error">La hora de fin debe ser mayor que la de inicio</small>
+      }
+    </div>
+    <div class="field">
+      <label for="cupo">Cupo máximo</label>
+      <input id="cupo" type="number" min="1" formControlName="cupoMaximo"
+             [placeholder]="salaElegida() ? 'Aforo: ' + salaElegida()!.capacidad : '20 por defecto'" />
+      <app-campo-error [control]="form.controls.cupoMaximo" />
+      @if (cupoExcede()) {
+        <small class="campo-error">Supera el aforo de la {{ salaElegida()!.nombre }} ({{ salaElegida()!.capacidad }})</small>
+      }
+    </div>
+    <div class="field">
+      <label for="acceso">Tipo de acceso</label>
+      <select id="acceso" formControlName="tipoAcceso">
+        <option value="MEMBRESIA">Incluida en la membresía</option>
+        <option value="LIBRE">Libre (se paga la entrada)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="precio">Precio de entrada (S/)</label>
+      <input id="precio" type="number" min="0" step="0.5" formControlName="precioEntrada" />
+      <app-campo-error [control]="form.controls.precioEntrada" />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" formControlName="estado">
+        <option [ngValue]="true">Activo</option>
+        <option [ngValue]="false">Inactivo</option>
+      </select>
+    </div>
+  </div>
+
+  @if (esLibre()) {
+    <div class="alert">Las clases libres no exigen membresía: cada persona paga la entrada al ingresar.</div>
+  }
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="guardando() || cupoExcede()">
+      {{ editandoId() ? 'Guardar cambios' : 'Registrar clase' }}
+    </button>
+    @if (editandoId()) {
+      <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<section class="card">
+  <div class="card-head">
+    <h2 class="card-title">Clases programadas</h2>
+    <div class="acciones">
+      <select class="input" [ngModel]="filtroDia()" (ngModelChange)="filtroDia.set($event)" aria-label="Filtrar por día">
+        <option value="">Todos los días</option>
+        @for (d of dias; track d) {
+          <option [value]="d">{{ d | dia }}</option>
+        }
+      </select>
+      <select class="input" [ngModel]="filtroSala()" (ngModelChange)="filtroSala.set($event)" aria-label="Filtrar por sala">
+        <option value="">Todas las salas</option>
+        @for (s of salas(); track s.idSala) {
+          <option [value]="s.idSala">{{ s.nombre }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Clase</th><th>Sala</th><th>Día y hora</th><th class="num">Cupo</th><th>Acceso</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (h of filtradas(); track h.idHorario) {
+          <tr [class.inactivo]="!h.estado">
+            <td>
+              <div class="strong">{{ h.actividad.nombre }}</div>
+              <div class="small muted">{{ h.entrenador.nombres }} {{ h.entrenador.apellidos }}</div>
+            </td>
+            <td>{{ h.sala?.nombre ?? '—' }}</td>
+            <td>
+              {{ h.dia | dia }} · {{ h.horaInicio | hora }}–{{ h.horaFin | hora }}
+              @if (h.fecha) {
+                <div class="small muted">Solo el {{ h.fecha | fecha }}</div>
+              }
+            </td>
+            <td class="num">{{ h.cupoMaximo ?? '—' }}</td>
+            <td>
+              @if (h.tipoAcceso === 'LIBRE') {
+                <span class="badge badge-warn">Libre · {{ h.precioEntrada | soles }}</span>
+              } @else {
+                <span class="badge badge-gray">Membresía</span>
+              }
+            </td>
+            <td><span class="badge" [class.badge-ok]="h.estado" [class.badge-bad]="!h.estado">{{ h.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="acciones">
+                <button class="btn btn-outline btn-sm" type="button" (click)="editar(h)">Editar</button>
+                <button class="btn btn-sm" [class.btn-danger]="h.estado" [class.btn-outline]="!h.estado" type="button" (click)="cambiarEstado(h)">
+                  {{ h.estado ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="vacio">No hay horarios con esos filtros</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

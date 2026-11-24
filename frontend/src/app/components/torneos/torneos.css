@@ -1,0 +1,4 @@
+.seleccionado td { background: var(--primary-soft); }
+.sub { font-size: 18px; margin: 8px 0 12px; }
+.inscribir { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px; background: #fafafa; }
+.input.corto { width: 90px; padding: 5px 8px; }
