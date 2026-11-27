@@ -1,0 +1,114 @@
+<div class="page-code">Gestión</div>
+<h1 class="page-title">Salas</h1>
+<p class="page-sub">Registra las salas (Sala 1, Sala 2...) con su aforo. Al programar una clase se elige la sala: el sistema evita cruces de horario y que el cupo supere el aforo.</p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">Salas activas</div><div class="stat-value">{{ totales().salas }}</div></div>
+  <div class="stat"><div class="stat-label">Aforo total</div><div class="stat-value">{{ totales().aforo }}</div></div>
+  <div class="stat dark"><div class="stat-label">Clases programadas</div><div class="stat-value">{{ totales().clases }}</div></div>
+</div>
+
+<div class="grid-side">
+  <form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2 class="card-title">{{ editandoId() ? 'Editar sala' : 'Registrar sala' }}</h2>
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" formControlName="nombre" placeholder="Ej. Sala 4" />
+        <app-campo-error [control]="form.controls.nombre" />
+      </div>
+      <div class="field">
+        <label for="capacidad">Aforo (personas)</label>
+        <input id="capacidad" type="number" min="1" formControlName="capacidad" />
+        <app-campo-error [control]="form.controls.capacidad" />
+      </div>
+      <div class="field full">
+        <label for="descripcion">Descripción <span class="opc">(opcional)</span></label>
+        <textarea id="descripcion" formControlName="descripcion" placeholder="Ej. Sala de spinning con 25 bicicletas"></textarea>
+      </div>
+      <div class="field">
+        <label for="estado">Estado</label>
+        <select id="estado" formControlName="estado">
+          <option [ngValue]="true">Activa</option>
+          <option [ngValue]="false">Inactiva</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" [disabled]="guardando()">
+        {{ editandoId() ? 'Guardar cambios' : 'Registrar sala' }}
+      </button>
+      @if (editandoId()) {
+        <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+      }
+    </div>
+  </form>
+
+  <section class="card">
+    <h2 class="card-title">Salas registradas</h2>
+    <p class="card-sub">Haz clic en "Horario" para ver la ocupación semanal.</p>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Sala</th><th class="num">Aforo</th><th class="num">Clases</th><th class="num">Horas/sem.</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (s of salas(); track s.idSala) {
+            <tr [class.inactivo]="!s.estado" [class.seleccionada]="salaVista()?.idSala === s.idSala">
+              <td class="wrap">
+                <div class="strong">{{ s.nombre }}</div>
+                @if (s.descripcion) {
+                  <div class="small muted">{{ s.descripcion }}</div>
+                }
+              </td>
+              <td class="num">{{ s.capacidad }}</td>
+              <td class="num">{{ s.clasesActivas }}</td>
+              <td class="num">{{ s.horasSemana }}</td>
+              <td><span class="badge" [class.badge-ok]="s.estado" [class.badge-bad]="!s.estado">{{ s.estado ? 'Activa' : 'Inactiva' }}</span></td>
+              <td>
+                <div class="acciones">
+                  <button class="btn btn-dark btn-sm" type="button" (click)="verHorario(s)">Horario</button>
+                  <button class="btn btn-outline btn-sm" type="button" (click)="editar(s)">Editar</button>
+                  <button class="btn btn-sm" [class.btn-danger]="s.estado" [class.btn-outline]="!s.estado" type="button" (click)="cambiarEstado(s)">
+                    {{ s.estado ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="vacio">No hay salas registradas</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+@if (salaVista(); as s) {
+  <section class="card semana-card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Horario semanal · {{ s.nombre }}</h2>
+        <p class="card-sub">Aforo de {{ s.capacidad }} personas · {{ horarios().length }} clase(s) activa(s)</p>
+      </div>
+      <a class="btn btn-primary btn-sm" routerLink="/clases/horarios">Programar horario</a>
+    </div>
+    <div class="semana">
+      @for (d of semana(); track d.dia) {
+        <div class="dia">
+          <div class="dia-nombre">{{ d.dia | dia }}</div>
+          @for (c of d.clases; track c.idHorario) {
+            <div class="bloque" [class.libre]="c.tipoAcceso === 'LIBRE'">
+              <div class="bloque-hora">{{ c.horaInicio | hora }} – {{ c.horaFin | hora }}</div>
+              <div class="bloque-act">{{ c.actividad }}</div>
+              <div class="bloque-det">{{ c.entrenador }}</div>
+              <div class="bloque-det">Cupo {{ c.cupoMaximo }}@if (c.fecha) { · {{ c.fecha | fecha }} }</div>
+            </div>
+          } @empty {
+            <div class="libre-dia">Libre</div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+}

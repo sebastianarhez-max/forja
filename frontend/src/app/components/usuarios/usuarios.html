@@ -1,0 +1,94 @@
+<form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <h2 class="card-title">{{ editando() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="nombres">Nombres</label>
+      <input id="nombres" formControlName="nombres" />
+      <app-campo-error [control]="form.controls.nombres" />
+    </div>
+    <div class="field">
+      <label for="apellidos">Apellidos</label>
+      <input id="apellidos" formControlName="apellidos" />
+      <app-campo-error [control]="form.controls.apellidos" />
+    </div>
+    <div class="field">
+      <label for="dni">DNI</label>
+      <input id="dni" formControlName="dni" maxlength="8" />
+      <app-campo-error [control]="form.controls.dni" formato="El DNI debe tener 8 dígitos" />
+    </div>
+    <div class="field">
+      <label for="login">Usuario</label>
+      <input id="login" formControlName="login" autocomplete="off" placeholder="Ej. lgomez" />
+      <app-campo-error [control]="form.controls.login" formato="Sin espacios ni tildes" />
+    </div>
+    <div class="field">
+      <label for="password">Contraseña @if (editando()) { <span class="opc">(vacía = no cambiar)</span> }</label>
+      <input id="password" type="password" formControlName="password" autocomplete="new-password" />
+      <app-campo-error [control]="form.controls.password" />
+    </div>
+    <div class="field">
+      <label for="correo">Correo</label>
+      <input id="correo" type="email" formControlName="correo" />
+      <app-campo-error [control]="form.controls.correo" />
+    </div>
+    <div class="field">
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" formControlName="telefono" maxlength="9" />
+      <app-campo-error [control]="form.controls.telefono" formato="El teléfono debe tener 9 dígitos" />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" formControlName="estado">
+        <option [ngValue]="true">Activo</option>
+        <option [ngValue]="false">Inactivo</option>
+      </select>
+    </div>
+  </div>
+  <div class="field" style="margin-top: 14px">
+    <label>Rol @if (editando()?.idUsuario === miId) { <span class="opc">(no puedes cambiar tus propios roles)</span> }</label>
+    <div class="chips">
+      @for (r of roles(); track r.idRol) {
+        <button type="button" class="chip" [class.activo]="rolesMarcados().has(r.idRol!)"
+                [disabled]="editando()?.idUsuario === miId" (click)="alternarRol(r.idRol!)">
+          {{ r.nombre }}
+        </button>
+      }
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ editando() ? 'Guardar cambios' : 'Crear usuario' }}</button>
+    @if (editando()) {
+      <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<section class="card">
+  <h2 class="card-title">Usuarios del sistema</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Correo</th><th>Teléfono</th><th>Registrado</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        @for (u of lista(); track u.idUsuario) {
+          <tr [class.inactivo]="!u.estado">
+            <td class="strong">{{ u.nombres }} {{ u.apellidos }} @if (u.idUsuario === miId) { <span class="badge badge-orange">Tú</span> }</td>
+            <td>{{ u.login }}</td>
+            <td>{{ nombresRoles(u) }}</td>
+            <td>{{ u.correo }}</td>
+            <td>{{ u.telefono }}</td>
+            <td>{{ u.fechaRegistro | fecha }}</td>
+            <td><span class="badge" [class.badge-ok]="u.estado" [class.badge-bad]="!u.estado">{{ u.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="acciones">
+                <button class="btn btn-outline btn-sm" type="button" (click)="editar(u)">Editar</button>
+                @if (u.idUsuario !== miId) {
+                  <button class="btn btn-sm" [class.btn-danger]="u.estado" [class.btn-outline]="!u.estado" type="button" (click)="cambiarEstado(u)">{{ u.estado ? 'Desactivar' : 'Activar' }}</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

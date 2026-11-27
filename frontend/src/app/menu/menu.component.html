@@ -1,0 +1,42 @@
+<header class="topbar">
+  <a [routerLink]="inicio" class="marca">FORJA</a>
+
+  <button class="hamburguesa" type="button" (click)="menuAbierto.set(!menuAbierto())" aria-label="Mostrar u ocultar el menú">
+    <span></span><span></span><span></span>
+  </button>
+
+  <!-- Menú dinámico: un desplegable por grupo, con las opciones del rol del usuario -->
+  <nav class="navegacion" [class.abierto]="menuAbierto()">
+    <ul class="grupos">
+      @for (g of menu; track g.titulo) {
+        <li class="grupo" [class.abierto]="grupoAbierto() === g.titulo">
+          <button type="button" class="grupo-boton" [class.activo]="grupoActivo(g)"
+                  [attr.aria-expanded]="grupoAbierto() === g.titulo" (click)="alternarGrupo(g.titulo)">
+            {{ g.titulo }} <span class="flecha">▾</span>
+          </button>
+          <ul class="desplegable">
+            @for (o of g.opciones; track o.idOpcion) {
+              <li><a [routerLink]="['/', o.ruta]" routerLinkActive="activo">{{ o.nombre }}</a></li>
+            }
+          </ul>
+        </li>
+      }
+    </ul>
+
+    <div class="sesion">
+      <div class="usuario">
+        <span class="nombre">{{ nombre }}</span>
+        <span class="rol">{{ roles }}</span>
+      </div>
+      <button type="button" class="salir" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </nav>
+</header>
+
+@if (grupoAbierto() || menuAbierto()) {
+  <div class="velo" (click)="cerrarMenus()"></div>
+}
+
+<main class="contenido">
+  <router-outlet />
+</main>

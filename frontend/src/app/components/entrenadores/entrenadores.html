@@ -1,0 +1,85 @@
+<form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <h2 class="card-title">{{ editandoId() ? 'Editar entrenador' : 'Registrar entrenador' }}</h2>
+  <div class="form-grid">
+    <div class="field">
+      <label for="nombres">Nombres</label>
+      <input id="nombres" formControlName="nombres" placeholder="Ej. Jorge" />
+      <app-campo-error [control]="form.controls.nombres" />
+    </div>
+    <div class="field">
+      <label for="apellidos">Apellidos</label>
+      <input id="apellidos" formControlName="apellidos" placeholder="Ej. Mendoza Lopez" />
+      <app-campo-error [control]="form.controls.apellidos" />
+    </div>
+    <div class="field">
+      <label for="dni">DNI</label>
+      <input id="dni" formControlName="dni" maxlength="8" placeholder="8 dígitos" />
+      <app-campo-error [control]="form.controls.dni" formato="El DNI debe tener 8 dígitos" />
+    </div>
+    <div class="field">
+      <label for="especialidad">Especialidad</label>
+      <input id="especialidad" formControlName="especialidad" placeholder="Ej. Crossfit" />
+    </div>
+    <div class="field">
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" formControlName="telefono" maxlength="9" placeholder="9 dígitos" />
+      <app-campo-error [control]="form.controls.telefono" formato="El teléfono debe tener 9 dígitos" />
+    </div>
+    <div class="field">
+      <label for="correo">Correo</label>
+      <input id="correo" type="email" formControlName="correo" placeholder="correo@ejemplo.com" />
+      <app-campo-error [control]="form.controls.correo" />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" formControlName="estado">
+        <option [ngValue]="true">Activo</option>
+        <option [ngValue]="false">Inactivo</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" [disabled]="guardando()">
+      {{ editandoId() ? 'Guardar cambios' : 'Registrar entrenador' }}
+    </button>
+    @if (editandoId()) {
+      <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<section class="card">
+  <div class="card-head">
+    <h2 class="card-title">Entrenadores registrados</h2>
+    <input class="input buscador" placeholder="Buscar por nombre, DNI..." [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" />
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Nombre</th><th>DNI</th><th>Especialidad</th><th>Teléfono</th><th>Correo</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (e of filtrados(); track e.idEntrenador) {
+          <tr [class.inactivo]="!e.estado">
+            <td class="strong">{{ e.nombres }} {{ e.apellidos }}</td>
+            <td>{{ e.dni }}</td>
+            <td>{{ e.especialidad }}</td>
+            <td>{{ e.telefono }}</td>
+            <td>{{ e.correo }}</td>
+            <td><span class="badge" [class.badge-ok]="e.estado" [class.badge-bad]="!e.estado">{{ e.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="acciones">
+                <button class="btn btn-outline btn-sm" type="button" (click)="editar(e)">Editar</button>
+                <button class="btn btn-sm" [class.btn-danger]="e.estado" [class.btn-outline]="!e.estado" type="button" (click)="cambiarEstado(e)">
+                  {{ e.estado ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="vacio">No hay entrenadores registrados</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,56 @@
+<div class="login">
+  <section class="panel-marca">
+    <div>
+      <h1 class="logo">FORJA</h1>
+      <div class="raya"></div>
+      <p class="lema">Sistema de gestión del gimnasio</p>
+    </div>
+    <ul class="puntos">
+      <li>Clases, salas y entrenadores</li>
+      <li>Reservas, ingresos y cobros</li>
+      <li>Membresías, tienda y reportes</li>
+    </ul>
+  </section>
+
+  <section class="panel-form">
+    <form [formGroup]="form" (ngSubmit)="ingresar()" class="caja" novalidate>
+      <h2>Iniciar sesión</h2>
+      <p class="muted small">Acceso para el personal del gimnasio</p>
+
+      @if (error()) {
+        <div class="alert bad">{{ error() }}</div>
+      }
+
+      <div class="field">
+        <label for="login">Usuario</label>
+        <input id="login" formControlName="login" autocomplete="username" placeholder="Tu usuario" />
+        <app-campo-error [control]="form.controls.login" />
+      </div>
+
+      <div class="field">
+        <label for="password">Contraseña</label>
+        <div class="pass">
+          <input
+            id="password"
+            [type]="verPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Tu contraseña"
+          />
+          <button type="button" class="ver" (click)="verPassword.set(!verPassword())">
+            {{ verPassword() ? 'Ocultar' : 'Ver' }}
+          </button>
+        </div>
+        <app-campo-error [control]="form.controls.password" />
+      </div>
+
+      <button class="btn btn-primary entrar" type="submit" [disabled]="cargando()">
+        @if (cargando()) {
+          <span class="spinner"></span> Ingresando...
+        } @else {
+          Iniciar sesión
+        }
+      </button>
+    </form>
+  </section>
+</div>

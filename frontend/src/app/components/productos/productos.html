@@ -1,0 +1,128 @@
+<div class="grid-side">
+  <div class="stack">
+    <form class="card" [formGroup]="formCategoria" (ngSubmit)="guardarCategoria()" novalidate>
+      <h2 class="card-title">{{ editandoCategoria() ? 'Editar categoría' : 'Registrar categoría' }}</h2>
+      <div class="form-grid cols-2">
+        <div class="field">
+          <label for="cnombre">Nombre</label>
+          <input id="cnombre" formControlName="nombre" placeholder="Ej. Suplementos" />
+          <app-campo-error [control]="formCategoria.controls.nombre" />
+        </div>
+        <div class="field">
+          <label for="cestado">Estado</label>
+          <select id="cestado" formControlName="estado">
+            <option [ngValue]="true">Activa</option>
+            <option [ngValue]="false">Inactiva</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{{ editandoCategoria() ? 'Guardar' : 'Registrar categoría' }}</button>
+        @if (editandoCategoria()) {
+          <button class="btn btn-link" type="button" (click)="cancelarCategoria()">Cancelar</button>
+        }
+      </div>
+      <div class="cat-lista">
+        @for (c of categorias(); track c.idCategoria) {
+          <button type="button" class="chip" [class.inactiva]="!c.estado" (click)="editarCategoria(c)" title="Editar">
+            {{ c.nombre }}
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+
+  <form class="card" [formGroup]="formProducto" (ngSubmit)="guardarProducto()" novalidate>
+    <h2 class="card-title">{{ editandoProducto() ? 'Editar producto' : 'Registrar producto' }}</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="pcat">Categoría</label>
+        <select id="pcat" formControlName="idCategoria">
+          <option [ngValue]="null" disabled>Seleccione</option>
+          @for (c of categoriasActivas(); track c.idCategoria) {
+            <option [ngValue]="c.idCategoria">{{ c.nombre }}</option>
+          }
+        </select>
+        <app-campo-error [control]="formProducto.controls.idCategoria" />
+      </div>
+      <div class="field">
+        <label for="pnombre">Nombre</label>
+        <input id="pnombre" formControlName="nombre" placeholder="Ej. Whey Protein 1kg" />
+        <app-campo-error [control]="formProducto.controls.nombre" />
+      </div>
+      <div class="field">
+        <label for="pprecio">Precio (S/)</label>
+        <input id="pprecio" type="number" min="0" step="0.5" formControlName="precio" />
+        <app-campo-error [control]="formProducto.controls.precio" />
+      </div>
+      <div class="field">
+        <label for="pstock">Stock</label>
+        <input id="pstock" type="number" min="0" formControlName="stock" />
+        <app-campo-error [control]="formProducto.controls.stock" />
+      </div>
+      <div class="field">
+        <label for="pmin">Stock mínimo</label>
+        <input id="pmin" type="number" min="0" formControlName="stockMinimo" />
+        <app-campo-error [control]="formProducto.controls.stockMinimo" />
+      </div>
+      <div class="field">
+        <label for="pestado">Estado</label>
+        <select id="pestado" formControlName="estado">
+          <option [ngValue]="true">Activo</option>
+          <option [ngValue]="false">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">{{ editandoProducto() ? 'Guardar cambios' : 'Registrar producto' }}</button>
+      @if (editandoProducto()) {
+        <button class="btn btn-link" type="button" (click)="cancelarProducto()">Cancelar</button>
+      }
+    </div>
+  </form>
+</div>
+
+<section class="card" style="margin-top: 20px">
+  <div class="card-head">
+    <h2 class="card-title">Productos</h2>
+    <div class="acciones">
+      <select class="input" [ngModel]="filtroCategoria()" (ngModelChange)="filtroCategoria.set($event)" aria-label="Categoría">
+        <option value="">Todas las categorías</option>
+        @for (c of categorias(); track c.idCategoria) {
+          <option [value]="c.idCategoria">{{ c.nombre }}</option>
+        }
+      </select>
+      <input class="input buscador" placeholder="Buscar producto..." [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" />
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Producto</th><th>Categoría</th><th class="num">Precio</th><th class="num">Stock</th><th class="num">Mínimo</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (p of filtrados(); track p.idProducto) {
+          <tr [class.inactivo]="!p.estado">
+            <td class="strong">{{ p.nombre }}</td>
+            <td>{{ p.categoria.nombre }}</td>
+            <td class="num">{{ p.precio | soles }}</td>
+            <td class="num">
+              <span [class.badge]="p.stock <= p.stockMinimo" [class.badge-bad]="p.stock <= p.stockMinimo">{{ p.stock }}</span>
+            </td>
+            <td class="num">{{ p.stockMinimo }}</td>
+            <td><span class="badge" [class.badge-ok]="p.estado" [class.badge-bad]="!p.estado">{{ p.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="acciones">
+                <a class="btn btn-outline btn-sm" routerLink="/tienda/reposicion" [queryParams]="{ idProducto: p.idProducto }">Reponer</a>
+                <button class="btn btn-outline btn-sm" type="button" (click)="editarProducto(p)">Editar</button>
+                <button class="btn btn-sm" [class.btn-danger]="p.estado" [class.btn-outline]="!p.estado" type="button" (click)="cambiarEstado(p)">{{ p.estado ? 'Desactivar' : 'Activar' }}</button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="vacio">No se encontraron productos</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

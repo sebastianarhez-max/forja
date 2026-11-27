@@ -1,0 +1,71 @@
+<div class="grid-side">
+  <form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2 class="card-title">{{ editandoId() ? 'Editar actividad' : 'Registrar actividad' }}</h2>
+    <p class="card-sub">Tipos de clase que ofrece el gimnasio: Crossfit, Yoga, Spinning...</p>
+    <div class="form-grid cols-2">
+      <div class="field full">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" formControlName="nombre" placeholder="Ej. Crossfit" />
+        <app-campo-error [control]="form.controls.nombre" />
+      </div>
+      <div class="field full">
+        <label for="descripcion">Descripción <span class="opc">(opcional)</span></label>
+        <textarea id="descripcion" formControlName="descripcion" placeholder="Ej. Entrenamiento funcional"></textarea>
+        <app-campo-error [control]="form.controls.descripcion" />
+      </div>
+      <div class="field">
+        <label for="estado">Estado</label>
+        <select id="estado" formControlName="estado">
+          <option [ngValue]="true">Activo</option>
+          <option [ngValue]="false">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit" [disabled]="guardando()">
+        {{ editandoId() ? 'Guardar cambios' : 'Registrar actividad' }}
+      </button>
+      @if (editandoId()) {
+        <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+      }
+    </div>
+  </form>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Actividades registradas</h2>
+        <p class="card-sub">Las actividades activas aparecen al programar horarios.</p>
+      </div>
+      <input class="input buscador" placeholder="Buscar..." [ngModel]="filtro()" (ngModelChange)="filtro.set($event)" />
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (a of filtradas(); track a.idActividad) {
+            <tr [class.inactivo]="!a.estado">
+              <td class="strong">{{ a.nombre }}</td>
+              <td class="wrap">{{ a.descripcion }}</td>
+              <td>
+                <span class="badge" [class.badge-ok]="a.estado" [class.badge-bad]="!a.estado">{{ a.estado ? 'Activo' : 'Inactivo' }}</span>
+              </td>
+              <td>
+                <div class="acciones">
+                  <button class="btn btn-outline btn-sm" type="button" (click)="editar(a)">Editar</button>
+                  <button class="btn btn-sm" [class.btn-danger]="a.estado" [class.btn-outline]="!a.estado" type="button" (click)="cambiarEstado(a)">
+                    {{ a.estado ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="vacio">No hay actividades registradas</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

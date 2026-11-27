@@ -40,6 +40,18 @@ public class RegistroServiceImpl implements RegistroService {
     @Autowired private HorarioRepository horarioRepo;
     @Autowired private AsistenciaRepository asistenciaRepo;
 
+    /**
+     * Error provocado a propósito cuando el JSON trae "simularError": true.
+     * Se lanza DESPUÉS de guardar todo: como el método es @Transactional, Spring hace ROLLBACK
+     * y no queda nada grabado. Sin @Transactional, lo guardado antes del error se quedaría en la BD.
+     */
+    private static void simularErrorSiCorresponde(boolean simular, String operacion) {
+        if (simular) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Error simulado después de guardar " + operacion + ": la transacción se deshizo (rollback)");
+        }
+    }
+
     private static ResponseStatusException err(String msg) {
         return new ResponseStatusException(HttpStatus.BAD_REQUEST, msg);
     }
@@ -62,8 +74,12 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     // ------------------------------------------------------------ membresía + pago
+    /**
+     * Membresía + pago en UNA transacción: INSERT membresia e INSERT pago.
+     * rollbackFor = Exception.class: se deshace ante cualquier error, también las excepciones "checked".
+     */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> registrarMembresia(MembresiaRegistroDTO dto) {
         Cliente c = clienteRepo.findById(req(dto.getIdCliente(), "idCliente")).orElseThrow(() -> err("El cliente no existe"));
         Plan p = planRepo.findById(req(dto.getIdPlan(), "idPlan")).orElseThrow(() -> err("El plan no existe"));
@@ -85,6 +101,8 @@ public class RegistroServiceImpl implements RegistroService {
         pago.setMonto(p.getPrecio());
         pago.setConcepto("Pago membresía " + p.getNombre());
         pago = pagoRepo.save(pago);
+        pagoRepo.flush(); // fuerza los INSERT ahora: así el rollback de la prueba deshace algo que sí llegó a la BD
+        simularErrorSiCorresponde(dto.isSimularError(), "la membresía y el pago");
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("membresia", m);
@@ -93,8 +111,13 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     // ------------------------------------------------------------ venta + detalle + stock
+    /**
+     * Venta + detalles + descuento de stock en UNA transacción:
+     * INSERT venta, INSERT detalle_venta y UPDATE producto por cada item, y UPDATE venta con el total.
+     * Si un item falla (stock insuficiente, producto inactivo...) se deshace TODO, incluso el stock ya descontado.
+     */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> registrarVenta(VentaRegistroDTO dto) {
         Usuario u = usuarioActual(dto.getIdUsuario());
         Cliente c = null;
@@ -133,6 +156,8 @@ public class RegistroServiceImpl implements RegistroService {
         }
         v.setTotal(Math.round(total * 100.0) / 100.0);
         v = ventaRepo.save(v);
+        ventaRepo.flush();
+        simularErrorSiCorresponde(dto.isSimularError(), "la venta, sus detalles y el descuento de stock");
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("venta", v);
@@ -165,7 +190,7 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Asistencia reservar(AsistenciaRegistroDTO dto) {
         Horario h = horarioRepo.findByIdParaActualizar(req(dto.getIdHorario(), "idHorario")).orElseThrow(() -> err("El horario no existe"));
         Cliente c = clienteRepo.findById(req(dto.getIdCliente(), "idCliente")).orElseThrow(() -> err("El cliente no existe"));
@@ -188,7 +213,7 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Asistencia registrarIngreso(AsistenciaRegistroDTO dto) {
         Horario h = horarioRepo.findByIdParaActualizar(req(dto.getIdHorario(), "idHorario")).orElseThrow(() -> err("El horario no existe"));
         Cliente c = clienteRepo.findById(req(dto.getIdCliente(), "idCliente")).orElseThrow(() -> err("El cliente no existe"));
@@ -223,7 +248,7 @@ public class RegistroServiceImpl implements RegistroService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Asistencia marcarFalto(Integer idAsistencia) {
         Asistencia a = asistenciaRepo.findById(idAsistencia)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asistencia no encontrada"));

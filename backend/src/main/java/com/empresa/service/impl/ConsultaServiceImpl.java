@@ -6,11 +6,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.repository.ConsultaRepository;
 import com.empresa.service.ConsultaService;
 
+/** Solo consultas: transacción de solo lectura (readOnly = true), como los listados del ejemplo del profesor. */
 @Service
+@Transactional(readOnly = true)
 public class ConsultaServiceImpl implements ConsultaService {
 
     @Autowired

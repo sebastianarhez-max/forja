@@ -14,4 +14,10 @@ public class VentaRegistroDTO {
     private Integer idUsuario;
     private Integer idCliente;
     private List<ItemVentaDTO> items;
+
+    /**
+     * Solo para pruebas (como el ejemplo de @Transactional del profesor): si es true, el servicio
+     * guarda todo y al final lanza un error, para comprobar que la transacción se deshace (rollback).
+     */
+    private boolean simularError;
 }

@@ -1,0 +1,136 @@
+<div class="saludo">
+  <div>
+    <div class="page-code">{{ fechaLarga }}</div>
+    <h1 class="page-title">Hola, {{ nombre }}</h1>
+    <p class="page-sub">Resumen del gimnasio para hoy.</p>
+  </div>
+</div>
+
+<div class="kpis">
+  @if (ver.membresias) {
+    <a class="kpi" routerLink="/membresias/vigentes">
+      <span class="kpi-label">Membresías vigentes</span>
+      <span class="kpi-valor">{{ vigentes().length }}</span>
+      <span class="kpi-pie">socios con acceso activo</span>
+    </a>
+    <a class="kpi" routerLink="/membresias/por-vencer" [class.alerta]="porVencer().length > 0">
+      <span class="kpi-label">Vencen en 7 días</span>
+      <span class="kpi-valor">{{ porVencer().length }}</span>
+      <span class="kpi-pie">para contactar</span>
+    </a>
+  }
+  @if (ver.tienda) {
+    <a class="kpi" routerLink="/tienda/stock-bajo" [class.alerta]="stockBajo().length > 0">
+      <span class="kpi-label">Productos con stock bajo</span>
+      <span class="kpi-valor">{{ stockBajo().length }}</span>
+      <span class="kpi-pie">por reponer</span>
+    </a>
+  }
+  @if (ver.reportes) {
+    <a class="kpi oscuro" routerLink="/reportes">
+      <span class="kpi-label">Ingresos del mes</span>
+      <span class="kpi-valor">{{ (ingresosMes()?.total ?? 0) | soles }}</span>
+      <span class="kpi-pie">membresías + tienda + clases libres</span>
+    </a>
+  }
+</div>
+
+<div class="grid-2">
+  @if (verClases) {
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title">Clases de hoy</h2>
+        <p class="card-sub">Ocupación promedio: {{ ocupacionHoy() }}%</p>
+      </div>
+      @if (ver.asistencia) {
+        <a class="btn btn-outline btn-sm" routerLink="/asistencia/reservas">Reservar cupo</a>
+      }
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Hora</th><th>Clase</th><th>Sala</th><th>Ocupación</th><th></th></tr></thead>
+        <tbody>
+          @for (c of clasesHoy(); track c.horario.idHorario) {
+            <tr>
+              <td class="strong">{{ c.horario.horaInicio | hora }}</td>
+              <td>
+                {{ c.horario.actividad.nombre }}
+                @if (c.horario.tipoAcceso === 'LIBRE') { <span class="badge badge-warn">Libre</span> }
+                <div class="small muted">{{ c.horario.entrenador.nombres }} {{ c.horario.entrenador.apellidos }}</div>
+              </td>
+              <td>{{ c.horario.sala?.nombre ?? '—' }}</td>
+              <td>
+                <div class="barra"><div class="relleno" [style.width.%]="c.cupo ? (c.ocupados / c.cupo) * 100 : 0"></div></div>
+                <span class="small">{{ c.ocupados }} / {{ c.cupo }}</span>
+              </td>
+              <td>
+                @if (ver.asistencia) {
+                  <a class="btn btn-link btn-sm" routerLink="/asistencia/asistentes" [queryParams]="{ idHorario: c.horario.idHorario, fecha: hoy }">Asistentes →</a>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="vacio">{{ cargando() ? 'Cargando...' : 'No hay clases programadas para hoy' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  }
+
+  <div class="stack">
+    <section class="card">
+      <h2 class="card-title">Accesos rápidos</h2>
+      <div class="rapidos">
+        @if (ver.asistencia) { <a routerLink="/asistencia/reservas"><strong>Reservar cupo</strong><span>Clases</span></a> }
+        @if (ver.clasesLibres) { <a routerLink="/clases-libres/cobrar"><strong>Cobrar clase libre</strong><span>Caja</span></a> }
+        @if (ver.membresias) { <a routerLink="/membresias/contratar"><strong>Contratar membresía</strong><span>Socios</span></a> }
+        @if (ver.tienda) {
+          <a routerLink="/tienda/venta"><strong>Nueva venta</strong><span>Tienda</span></a>
+          <a routerLink="/tienda/reposicion"><strong>Reponer stock</strong><span>Inventario</span></a>
+        }
+      </div>
+    </section>
+
+    @if (proximoTorneo(); as t) {
+      <a class="card torneo" routerLink="/torneos">
+        <div class="small muted">Próximo torneo</div>
+        <div class="torneo-nombre">{{ t.nombre }}</div>
+        <div class="small">{{ t.fecha | fecha }} · {{ t.lugar || 'Lugar por definir' }}</div>
+      </a>
+    }
+
+    @if (ver.membresias) {
+    <section class="card">
+      <h2 class="card-title">Membresías por vencer</h2>
+      <ul class="lista-simple">
+        @for (m of porVencer().slice(0, 5); track m.idMembresia) {
+          <li>
+            <span><strong>{{ m.nombres }} {{ m.apellidos }}</strong> · {{ m.plan }} · {{ m.telefono || 'sin teléfono' }}</span>
+            <span class="badge" [class.badge-warn]="m.diasRestantes > 2" [class.badge-bad]="m.diasRestantes <= 2">{{ m.fechaFin | fecha }}</span>
+          </li>
+        } @empty {
+          <li class="muted">Ninguna membresía vence esta semana</li>
+        }
+      </ul>
+    </section>
+    }
+
+    @if (ver.tienda) {
+    <section class="card">
+      <h2 class="card-title">Stock bajo</h2>
+      <ul class="lista-simple">
+        @for (p of stockBajo().slice(0, 5); track p.idProducto) {
+          <li>
+            <span><strong>{{ p.nombre }}</strong> · {{ p.categoria }}</span>
+            <span class="badge badge-bad">{{ p.stock }} / mín. {{ p.stockMinimo }}</span>
+          </li>
+        } @empty {
+          <li class="muted">Inventario en orden</li>
+        }
+      </ul>
+    </section>
+    }
+  </div>
+</div>

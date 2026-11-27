@@ -1,0 +1,99 @@
+<section class="card">
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 2">
+      <label for="socio">Socio</label>
+      <select id="socio" [ngModel]="idCliente()" (ngModelChange)="elegir($event)">
+        <option [ngValue]="null" disabled>Seleccione un socio</option>
+        @for (c of socios(); track c.idCliente) {
+          <option [ngValue]="c.idCliente">{{ c.nombres }} {{ c.apellidos }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  @if (socio(); as s) {
+    <div class="stats" style="margin-bottom: 0">
+      <div class="stat"><div class="stat-label">Evaluaciones</div><div class="stat-value">{{ evaluaciones().length }}</div></div>
+      @if (evaluaciones()[0]; as u) {
+        <div class="stat"><div class="stat-label">Último peso</div><div class="stat-value">{{ u.peso }} kg</div></div>
+        <div class="stat dark"><div class="stat-label">IMC actual · {{ categoria(u.imc).texto }}</div><div class="stat-value">{{ u.imc }}</div></div>
+      }
+      @if (progreso() !== null) {
+        <div class="stat"><div class="stat-label">Cambio de peso total</div><div class="stat-value">{{ progreso()! > 0 ? '+' : '' }}{{ progreso() }} kg</div></div>
+      }
+    </div>
+  }
+</section>
+
+@if (socio(); as s) {
+  <div>
+    <form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <h2 class="card-title">{{ editandoId() ? 'Editar evaluación' : 'Nueva evaluación' }}</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="fecha">Fecha</label>
+          <input id="fecha" type="date" formControlName="fecha" [max]="hoy" />
+        </div>
+        <div class="field">
+          <label for="peso">Peso (kg)</label>
+          <input id="peso" type="number" step="0.1" formControlName="peso" placeholder="Ej. 72.5" />
+          <app-campo-error [control]="form.controls.peso" />
+        </div>
+        <div class="field">
+          <label for="altura">Estatura (m)</label>
+          <input id="altura" type="number" step="0.01" formControlName="altura" placeholder="Ej. 1.70" />
+          <app-campo-error [control]="form.controls.altura" />
+        </div>
+        <div class="field">
+          <label for="grasa">Grasa corporal (%) <span class="opc">(opcional)</span></label>
+          <input id="grasa" type="number" step="0.1" formControlName="grasaCorporal" />
+          <app-campo-error [control]="form.controls.grasaCorporal" />
+        </div>
+        <div class="field full">
+          <label for="obs">Observaciones</label>
+          <textarea id="obs" formControlName="observaciones" placeholder="Ej. Buen avance en fuerza"></textarea>
+        </div>
+      </div>
+      @if (imc(); as i) {
+        <div class="info-box">
+          <div class="info-label">IMC calculado</div>
+          <div class="info-value">{{ i }} <span [class]="'badge ' + categoria(i).clase">{{ categoria(i).texto }}</span></div>
+        </div>
+      }
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ editandoId() ? 'Guardar cambios' : 'Registrar evaluación' }}</button>
+        @if (editandoId()) {
+          <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+        }
+      </div>
+    </form>
+
+    <section class="card">
+      <h2 class="card-title">Historial de {{ s.nombres }}</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Fecha</th><th class="num">Peso</th><th class="num">Estatura</th><th>IMC</th><th class="num">Grasa</th><th>Observaciones</th><th></th></tr></thead>
+          <tbody>
+            @for (e of evaluaciones(); track e.idEvaluacion) {
+              <tr>
+                <td>{{ e.fecha | fecha }}</td>
+                <td class="num strong">{{ e.peso }} kg</td>
+                <td class="num">{{ e.altura }} m</td>
+                <td>{{ e.imc }} <span [class]="'badge ' + categoria(e.imc).clase">{{ categoria(e.imc).texto }}</span></td>
+                <td class="num">{{ e.grasaCorporal != null ? e.grasaCorporal + ' %' : '—' }}</td>
+                <td class="wrap">{{ e.observaciones }}</td>
+                <td>
+                  <div class="acciones">
+                    <button class="btn btn-outline btn-sm" type="button" (click)="editar(e)">Editar</button>
+                    <button class="btn btn-danger btn-sm" type="button" (click)="eliminar(e)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="vacio">Este socio todavía no tiene evaluaciones</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+}

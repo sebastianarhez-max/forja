@@ -16,3 +16,6 @@ frontend/.angular/
 .env
 .vscode/
 .DS_Store
+
+# Paquetes de cambios (no se versionan)
+*.zip
