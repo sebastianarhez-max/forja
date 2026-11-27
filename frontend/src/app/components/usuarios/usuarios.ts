@@ -1,13 +1,18 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Rol } from '../../models/rol';
 import { Usuario } from '../../models/usuario';
+import { RolService } from '../../services/rol-service';
 import { TokenService } from '../../security/token.service';
 import { UsuarioService } from '../../services/usuario-service';
 import { CampoError } from '../campo-error/campo-error';
 import { FechaPipe } from '../../shared/pipes';
 import { alertaAviso, alertaError, alertaExito, confirmar } from '../../shared/util';
 
-/** Cuentas de administrador que pueden ingresar al sistema. */
+/**
+ * Cuentas que pueden ingresar al sistema. Cada usuario tiene uno o más roles
+ * (Administrador, Control de ingreso, Vendedor...) que definen su menú.
+ */
 @Component({
   selector: 'app-usuarios',
   imports: [ReactiveFormsModule, CampoError, FechaPipe],
@@ -15,7 +20,12 @@ import { alertaAviso, alertaError, alertaExito, confirmar } from '../../shared/u
 })
 export class Usuarios implements OnInit {
   private readonly service = inject(UsuarioService);
+  private readonly rolService = inject(RolService);
   readonly miId = inject(TokenService).getUserId();
+
+  /** Roles activos para asignar y los ids marcados en el formulario. */
+  readonly roles = signal<Rol[]>([]);
+  readonly rolesMarcados = signal<Set<number>>(new Set());
 
   readonly lista = signal<Usuario[]>([]);
   readonly editando = signal<Usuario | null>(null);
@@ -33,7 +43,26 @@ export class Usuarios implements OnInit {
   });
 
   ngOnInit(): void {
+    this.rolService.lista().subscribe({
+      next: (d) => this.roles.set(d.filter((r) => r.estado)),
+      error: (e) => alertaError(e, 'No se pudo cargar los roles'),
+    });
     this.cargar();
+  }
+
+  /** Nombres de los roles de un usuario para la tabla. */
+  nombresRoles(u: Usuario): string {
+    return (u.roles ?? []).map((r) => r.nombre).join(', ') || 'Sin rol';
+  }
+
+  alternarRol(idRol: number): void {
+    const s = new Set(this.rolesMarcados());
+    if (s.has(idRol)) {
+      s.delete(idRol);
+    } else {
+      s.add(idRol);
+    }
+    this.rolesMarcados.set(s);
   }
 
   cargar(): void {
@@ -62,7 +91,17 @@ export class Usuarios implements OnInit {
       alertaAviso('No puedes desactivar tu propia cuenta');
       return;
     }
-    const obj: Usuario = { ...v, login, nombres: v.nombres.trim(), apellidos: v.apellidos.trim() };
+    if (this.rolesMarcados().size === 0) {
+      alertaAviso('Asigna al menos un rol al usuario');
+      return;
+    }
+    const obj: Usuario = {
+      ...v,
+      login,
+      nombres: v.nombres.trim(),
+      apellidos: v.apellidos.trim(),
+      roles: [...this.rolesMarcados()].map((idRol) => ({ idRol })),
+    };
     if (!v.password) delete obj.password; // al editar, sin contraseña se conserva la actual
     this.guardando.set(true);
     const id = previo?.idUsuario;
@@ -91,6 +130,7 @@ export class Usuarios implements OnInit {
       telefono: u.telefono ?? '',
       estado: u.estado,
     });
+    this.rolesMarcados.set(new Set((u.roles ?? []).map((r) => r.idRol!)));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -98,6 +138,7 @@ export class Usuarios implements OnInit {
     this.editando.set(null);
     this.guardando.set(false);
     this.form.reset({ nombres: '', apellidos: '', dni: '', login: '', password: '', correo: '', telefono: '', estado: true });
+    this.rolesMarcados.set(new Set());
   }
 
   async cambiarEstado(u: Usuario): Promise<void> {

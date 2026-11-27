@@ -1,0 +1,4794 @@
+{
+  "info": {
+    "name": "FORJA - Grupo 5 - Pruebas por historia de usuario",
+    "description": "Pruebas de los endpoints de cada historia de usuario del primer entregable, con un login por rol (Administrador: carias; Control de ingreso: gcermeno, fdiaz y lcapellan; Vendedor: marmas). Contraseña de todos: 1234.\n\nCómo ejecutarla: levantar el backend en baseUrl (local: http://localhost:8080; en la nube, cambiar baseUrl por la URL de Render) y correr las carpetas en orden (HU01 a HU06) con el Collection Runner. Cada carpeta empieza con su login y crea sus propios datos, así que se puede ejecutar varias veces.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{tokenAdmin}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "HU01 - Inicio de sesión, actividades, entrenadores y clases (Arias Hernandez, Cristhian Sebastian - U20241a467)",
+      "description": "Rol: Administrador. Ejecutar primero: el login guarda el token y calcula las fechas de prueba.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenAdmin}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "TC-001 Login correcto (Administrador: carias)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"carias\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenAdmin\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioAdmin\", r.idUsuario);",
+                  "pm.test(\"Rol Administrador\", () => pm.expect(r.roles).to.include(\"Administrador\"));",
+                  "pm.test(\"Menú con 12 opciones\", () => pm.expect(r.opciones.length).to.eql(12));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "// Fechas de prueba relativas a hoy: clase con membresía (+7 días), clase libre (+8) y el próximo domingo",
+                  "const f = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');",
+                  "const sumar = n => { const d = new Date(); d.setDate(d.getDate() + n); return d; };",
+                  "const hoy = new Date();",
+                  "const domingo = sumar(((7 - hoy.getDay()) % 7) || 7);",
+                  "pm.collectionVariables.set(\"hoy\", f(hoy));",
+                  "pm.collectionVariables.set(\"fechaClase\", f(sumar(7)));",
+                  "pm.collectionVariables.set(\"fechaClaseSiguiente\", f(sumar(8)));",
+                  "pm.collectionVariables.set(\"fechaLibre\", f(sumar(9)));",
+                  "pm.collectionVariables.set(\"fechaDomingo\", f(domingo));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002 Login rechazado (contraseña incorrecta)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"carias\",\n  \"password\": \"clave-incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mensaje: Credenciales incorrectas\", () => pm.expect(pm.response.json().error).to.include(\"Credenciales incorrectas\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003 Registrar actividad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Kickboxing {{rand}}\",\n  \"descripcion\": \"Clase de kickboxing y cardio\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const a = pm.response.json().data;",
+                  "pm.test(\"Devuelve idActividad\", () => pm.expect(a.idActividad).to.be.a(\"number\"));",
+                  "pm.collectionVariables.set(\"idActividad\", a.idActividad);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004 Listar actividades (combo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/actividad",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "actividad"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Aparece la actividad creada\", () => pm.expect(pm.response.json().map(a => a.idActividad)).to.include(Number(pm.collectionVariables.get(\"idActividad\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005 Registrar entrenador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Jorge\",\n  \"apellidos\": \"Mendoza Lopez\",\n  \"dni\": \"{{dni}}\",\n  \"especialidad\": \"Kickboxing\",\n  \"telefono\": \"999111222\",\n  \"correo\": \"jorge.mendoza@gym.com\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const e = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idEntrenador\", e.idEntrenador);",
+                  "pm.test(\"Devuelve idEntrenador\", () => pm.expect(e.idEntrenador).to.be.a(\"number\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006 Listar entrenadores (combo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/entrenador",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "entrenador"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Aparece el entrenador creado\", () => pm.expect(pm.response.json().map(e => e.idEntrenador)).to.include(Number(pm.collectionVariables.get(\"idEntrenador\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007 Registrar clase MEMBRESIA con fecha (cupo 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actividad\": { \"idActividad\": {{idActividad}} },\n  \"entrenador\": { \"idEntrenador\": {{idEntrenador}} },\n  \"fecha\": \"{{fechaClase}}\",\n  \"horaInicio\": \"06:00:00\",\n  \"horaFin\": \"07:00:00\",\n  \"cupoMaximo\": 1,\n  \"tipoAcceso\": \"MEMBRESIA\",\n  \"precioEntrada\": 0,\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Clase de una fecha específica (dentro de 7 días). Cupo 1 para probar 'sin cupo' en la HU02."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const h = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idHorarioMembresia\", h.idHorario);",
+                  "pm.test(\"Clase activa con su día calculado\", () => { pm.expect(h.estado).to.eql(true); pm.expect(h.dia).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008 Consultar clase por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario/{{idHorarioMembresia}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario",
+                "{{idHorarioMembresia}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Es la clase registrada\", () => pm.expect(pm.response.json().idHorario).to.eql(Number(pm.collectionVariables.get(\"idHorarioMembresia\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009 Valores por defecto (sin cupo, tipo ni precio)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actividad\": { \"idActividad\": {{idActividad}} },\n  \"entrenador\": { \"idEntrenador\": {{idEntrenador}} },\n  \"dia\": \"Domingo\",\n  \"horaInicio\": \"05:00:00\",\n  \"horaFin\": \"06:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const h = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idHorarioDomingo\", h.idHorario);",
+                  "pm.test(\"Cupo 20, MEMBRESIA y precio 0\", () => { pm.expect(h.cupoMaximo).to.eql(20); pm.expect(h.tipoAcceso).to.eql(\"MEMBRESIA\"); pm.expect(Number(h.precioEntrada)).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010 Clase inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensaje: Registro no encontrado\", () => pm.expect(pm.response.json().error).to.include(\"Registro no encontrado\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011 JSON inválido (tipoAcceso fuera del enum)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actividad\": { \"idActividad\": {{idActividad}} },\n  \"entrenador\": { \"idEntrenador\": {{idEntrenador}} },\n  \"dia\": \"Lunes\",\n  \"horaInicio\": \"05:00:00\",\n  \"horaFin\": \"06:00:00\",\n  \"tipoAcceso\": \"FUERA_DEL_ENUM\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: JSON inválido\", () => pm.expect(pm.response.json().error).to.include(\"JSON inválido\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HU02 - Clientes, reservas e ingreso a clase (Cermeño Yance, Gabriel - U202317426)",
+      "description": "Rol: Control de ingreso. Requiere haber ejecutado la HU01 (usa la clase creada ahí).",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenControl}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Login Control de ingreso (gcermeno)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"gcermeno\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenControl\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioControl\", r.idUsuario);",
+                  "pm.test(\"Rol Control de ingreso\", () => pm.expect(r.roles).to.include(\"Control de ingreso\"));",
+                  "pm.test(\"Menú con 7 opciones\", () => pm.expect(r.opciones.length).to.eql(7));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "// Fechas de prueba relativas a hoy: clase con membresía (+7 días), clase libre (+8) y el próximo domingo",
+                  "const f = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');",
+                  "const sumar = n => { const d = new Date(); d.setDate(d.getDate() + n); return d; };",
+                  "const hoy = new Date();",
+                  "const domingo = sumar(((7 - hoy.getDay()) % 7) || 7);",
+                  "pm.collectionVariables.set(\"hoy\", f(hoy));",
+                  "pm.collectionVariables.set(\"fechaClase\", f(sumar(7)));",
+                  "pm.collectionVariables.set(\"fechaClaseSiguiente\", f(sumar(8)));",
+                  "pm.collectionVariables.set(\"fechaLibre\", f(sumar(9)));",
+                  "pm.collectionVariables.set(\"fechaDomingo\", f(domingo));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-001 Registrar cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Diego\",\n  \"apellidos\": \"Salazar Ruiz\",\n  \"dni\": \"{{dni}}\",\n  \"correo\": \"socio{{dni}}@gmail.com\",\n  \"telefono\": \"999222333\",\n  \"fechaNacimiento\": \"2000-05-10\",\n  \"direccion\": \"Lima\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const c = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idCliente1\", c.idCliente);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002 Listar clientes (combo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye el cliente registrado\", () => pm.expect(pm.response.json().map(c => c.idCliente)).to.include(Number(pm.collectionVariables.get(\"idCliente1\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: membresía del cliente 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente1}},\n  \"idPlan\": 2,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Preparación: membresía mensual desde hoy (cubre la clase de dentro de 7 días)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: cliente 2 (sin membresía)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Lucia\",\n  \"apellidos\": \"Ramos Vega\",\n  \"dni\": \"{{dni}}\",\n  \"correo\": \"socio{{dni}}@gmail.com\",\n  \"telefono\": \"999222333\",\n  \"fechaNacimiento\": \"2000-05-10\",\n  \"direccion\": \"Lima\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const c = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idCliente2\", c.idCliente);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: cliente 3 (con membresía)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Mario\",\n  \"apellidos\": \"Quispe Soto\",\n  \"dni\": \"{{dni}}\",\n  \"correo\": \"socio{{dni}}@gmail.com\",\n  \"telefono\": \"999222333\",\n  \"fechaNacimiento\": \"2000-05-10\",\n  \"direccion\": \"Lima\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const c = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idCliente3\", c.idCliente);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: membresía del cliente 3",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente3}},\n  \"idPlan\": 2,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Preparación: membresía mensual desde hoy (cubre la clase de dentro de 7 días)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003 Consultar cupos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/cupos?idHorario={{idHorarioMembresia}}&fecha={{fechaClase}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "cupos"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "{{idHorarioMembresia}}"
+                },
+                {
+                  "key": "fecha",
+                  "value": "{{fechaClase}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const c = pm.response.json()[0];",
+                  "pm.test(\"Cupo 1, 0 ocupados, 1 disponible\", () => { pm.expect(Number(c.cupoMaximo)).to.eql(1); pm.expect(Number(c.ocupados)).to.eql(0); pm.expect(Number(c.disponibles)).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004 Reservar (membresía vigente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente1}},\n  \"fecha\": \"{{fechaClase}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const a = pm.response.json();",
+                  "pm.collectionVariables.set(\"idReserva\", a.idAsistencia);",
+                  "pm.test(\"RESERVADO y monto 0\", () => { pm.expect(a.estado).to.eql(\"RESERVADO\"); pm.expect(Number(a.montoPagado)).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005 Membresía vencida o inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente2}},\n  \"fecha\": \"{{fechaClase}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: no tiene una membresía vigente\", () => pm.expect(pm.response.json().error).to.include(\"no tiene una membresía vigente\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006 Fecha incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente1}},\n  \"fecha\": \"{{fechaClaseSiguiente}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Esta clase solo se dicta el\", () => pm.expect(pm.response.json().error).to.include(\"Esta clase solo se dicta el\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007a Reserva duplicada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente1}},\n  \"fecha\": \"{{fechaClase}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: ya tiene registro en esta clase\", () => pm.expect(pm.response.json().error).to.include(\"ya tiene registro en esta clase\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007b Clase sin cupo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente3}},\n  \"fecha\": \"{{fechaClase}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: no tiene cupos disponibles\", () => pm.expect(pm.response.json().error).to.include(\"no tiene cupos disponibles\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008 Registrar ingreso (membresía)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente1}},\n  \"fecha\": \"{{fechaClase}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json();",
+                  "pm.test(\"ASISTIO con hora de ingreso y monto 0\", () => { pm.expect(a.estado).to.eql(\"ASISTIO\"); pm.expect(a.horaIngreso).to.not.be.null; pm.expect(Number(a.montoPagado)).to.eql(0); });",
+                  "pm.test(\"Actualiza la misma reserva\", () => pm.expect(a.idAsistencia).to.eql(Number(pm.collectionVariables.get(\"idReserva\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009 Ingreso duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioMembresia}},\n  \"idCliente\": {{idCliente1}},\n  \"fecha\": \"{{fechaClase}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: ya registró su ingreso\", () => pm.expect(pm.response.json().error).to.include(\"ya registró su ingreso\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: reserva del cliente 3 el domingo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioDomingo}},\n  \"idCliente\": {{idCliente3}},\n  \"fecha\": \"{{fechaDomingo}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idReservaDomingo\", pm.response.json().idAsistencia);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010 Marcar falta (libera el cupo)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/{{idReservaDomingo}}/falto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "{{idReservaDomingo}}",
+                "falto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Queda en FALTO\", () => pm.expect(pm.response.json().estado).to.eql(\"FALTO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010b Cupo liberado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/cupos?idHorario={{idHorarioDomingo}}&fecha={{fechaDomingo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "cupos"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "{{idHorarioDomingo}}"
+                },
+                {
+                  "key": "fecha",
+                  "value": "{{fechaDomingo}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Los 20 cupos están disponibles\", () => pm.expect(Number(pm.response.json()[0].disponibles)).to.eql(20));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011a Falta rechazada (el cliente ya ingresó)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/{{idReserva}}/falto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "{{idReserva}}",
+                "falto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: ya ingresó\", () => pm.expect(pm.response.json().error).to.include(\"ya ingresó\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011b Falta con id inexistente",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/999999/falto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "999999",
+                "falto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensaje: Asistencia no encontrada\", () => pm.expect(pm.response.json().error).to.include(\"Asistencia no encontrada\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012 Ver asistentes de la clase",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/asistencia?idHorario={{idHorarioMembresia}}&fecha={{fechaClase}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "asistencia"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "{{idHorarioMembresia}}"
+                },
+                {
+                  "key": "fecha",
+                  "value": "{{fechaClase}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const l = pm.response.json();",
+                  "pm.test(\"El cliente 1 aparece como ASISTIO\", () => pm.expect(l.find(x => x.idCliente == pm.collectionVariables.get(\"idCliente1\")).estado).to.eql(\"ASISTIO\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HU03 - Métodos de pago, cobro de clase libre y recaudación (Diaz Corzano, Favio Stephano - U202318689)",
+      "description": "Rol: Control de ingreso. Requiere haber ejecutado la HU02 (usa sus clientes).",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenControl}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Login Control de ingreso (fdiaz)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"fdiaz\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenControl\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioControl\", r.idUsuario);",
+                  "pm.test(\"Rol Control de ingreso\", () => pm.expect(r.roles).to.include(\"Control de ingreso\"));",
+                  "pm.test(\"Menú con 7 opciones\", () => pm.expect(r.opciones.length).to.eql(7));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "// Fechas de prueba relativas a hoy: clase con membresía (+7 días), clase libre (+8) y el próximo domingo",
+                  "const f = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');",
+                  "const sumar = n => { const d = new Date(); d.setDate(d.getDate() + n); return d; };",
+                  "const hoy = new Date();",
+                  "const domingo = sumar(((7 - hoy.getDay()) % 7) || 7);",
+                  "pm.collectionVariables.set(\"hoy\", f(hoy));",
+                  "pm.collectionVariables.set(\"fechaClase\", f(sumar(7)));",
+                  "pm.collectionVariables.set(\"fechaClaseSiguiente\", f(sumar(8)));",
+                  "pm.collectionVariables.set(\"fechaLibre\", f(sumar(9)));",
+                  "pm.collectionVariables.set(\"fechaDomingo\", f(domingo));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: clase LIBRE de S/ 15 (cupo 3)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/horario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "horario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actividad\": { \"idActividad\": 6 },\n  \"entrenador\": { \"idEntrenador\": 1 },\n  \"fecha\": \"{{fechaLibre}}\",\n  \"horaInicio\": \"21:00:00\",\n  \"horaFin\": \"22:00:00\",\n  \"cupoMaximo\": 3,\n  \"tipoAcceso\": \"LIBRE\",\n  \"precioEntrada\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idHorarioLibre\", pm.response.json().data.idHorario);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-001 Listar métodos de pago (combo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/tipoPago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "tipoPago"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista con idTipoPago, nombre y estado\", () => { const t = pm.response.json()[0]; pm.expect(t).to.have.keys(\"idTipoPago\", \"nombre\", \"estado\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: cliente 4 (sin membresía)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Ana\",\n  \"apellidos\": \"Torres Vidal\",\n  \"dni\": \"{{dni}}\",\n  \"correo\": \"socio{{dni}}@gmail.com\",\n  \"telefono\": \"999222333\",\n  \"fechaNacimiento\": \"2000-05-10\",\n  \"direccion\": \"Lima\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const c = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idCliente4\", c.idCliente);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: cliente 5 (sin membresía)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Lopez Rivas\",\n  \"dni\": \"{{dni}}\",\n  \"correo\": \"socio{{dni}}@gmail.com\",\n  \"telefono\": \"999222333\",\n  \"fechaNacimiento\": \"2000-05-10\",\n  \"direccion\": \"Lima\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const c = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idCliente5\", c.idCliente);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002 Ingreso con Efectivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente2}},\n  \"fecha\": \"{{fechaLibre}}\",\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json();",
+                  "pm.test(\"ASISTIO y monto 15\", () => { pm.expect(a.estado).to.eql(\"ASISTIO\"); pm.expect(Number(a.montoPagado)).to.eql(15); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003 Cliente sin membresía con Yape",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente4}},\n  \"fecha\": \"{{fechaLibre}}\",\n  \"idTipoPago\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Ingreso permitido sin membresía, monto 15\", () => pm.expect(Number(pm.response.json().montoPagado)).to.eql(15));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004 Método de pago omitido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente5}},\n  \"fecha\": \"{{fechaLibre}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: idTipoPago (obligatorio en clases LIBRE)\", () => pm.expect(pm.response.json().error).to.include(\"idTipoPago (obligatorio en clases LIBRE)\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005 Método de pago inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente5}},\n  \"fecha\": \"{{fechaLibre}}\",\n  \"idTipoPago\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: El tipo de pago no existe\", () => pm.expect(pm.response.json().error).to.include(\"El tipo de pago no existe\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006 Ingreso duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente2}},\n  \"fecha\": \"{{fechaLibre}}\",\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: ya registró su ingreso\", () => pm.expect(pm.response.json().error).to.include(\"ya registró su ingreso\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: reserva previa del cliente 5",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/reservar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "reservar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente5}},\n  \"fecha\": \"{{fechaLibre}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idReservaLibre\", pm.response.json().idAsistencia);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011 Ingreso con reserva previa (Plin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente5}},\n  \"fecha\": \"{{fechaLibre}}\",\n  \"idTipoPago\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json();",
+                  "pm.test(\"La misma reserva pasa a ASISTIO con monto 15\", () => { pm.expect(a.idAsistencia).to.eql(Number(pm.collectionVariables.get(\"idReservaLibre\"))); pm.expect(a.estado).to.eql(\"ASISTIO\"); pm.expect(Number(a.montoPagado)).to.eql(15); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007 Clase sin cupo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/asistencia/ingreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "asistencia",
+                "ingreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idHorario\": {{idHorarioLibre}},\n  \"idCliente\": {{idCliente1}},\n  \"fecha\": \"{{fechaLibre}}\",\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: no tiene cupos disponibles\", () => pm.expect(pm.response.json().error).to.include(\"no tiene cupos disponibles\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008 y TC-010 Total recaudado (solo cuentan los ASISTIO)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/recaudado-clase?idHorario={{idHorarioLibre}}&fecha={{fechaLibre}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "recaudado-clase"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "{{idHorarioLibre}}"
+                },
+                {
+                  "key": "fecha",
+                  "value": "{{fechaLibre}}"
+                }
+              ]
+            },
+            "description": "También cubre TC-010: las reservas y faltas no suman, solo los ASISTIO."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json()[0];",
+                  "pm.test(\"3 personas y S/ 45\", () => { pm.expect(Number(r.personasIngresaron)).to.eql(3); pm.expect(Number(r.totalRecaudado)).to.eql(45); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009 Desglose por método de pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/recaudado-clase/por-pago?idHorario={{idHorarioLibre}}&fecha={{fechaLibre}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "recaudado-clase",
+                "por-pago"
+              ],
+              "query": [
+                {
+                  "key": "idHorario",
+                  "value": "{{idHorarioLibre}}"
+                },
+                {
+                  "key": "fecha",
+                  "value": "{{fechaLibre}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const l = pm.response.json();",
+                  "pm.test(\"Efectivo, Yape y Plin: 1 ingreso de S/ 15 cada uno\", () => { pm.expect(l.length).to.eql(3); l.forEach(x => { pm.expect(Number(x.cantidad)).to.eql(1); pm.expect(Number(x.total)).to.eql(15); }); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HU04 - Planes, membresía con pago y vigencia (Capellan Solis, Leonel Diesel - U20231E969)",
+      "description": "Rol: Control de ingreso.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenControl}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Login Control de ingreso (lcapellan)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"lcapellan\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenControl\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioControl\", r.idUsuario);",
+                  "pm.test(\"Rol Control de ingreso\", () => pm.expect(r.roles).to.include(\"Control de ingreso\"));",
+                  "pm.test(\"Menú con 7 opciones\", () => pm.expect(r.opciones.length).to.eql(7));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "// Fechas de prueba relativas a hoy: clase con membresía (+7 días), clase libre (+8) y el próximo domingo",
+                  "const f = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');",
+                  "const sumar = n => { const d = new Date(); d.setDate(d.getDate() + n); return d; };",
+                  "const hoy = new Date();",
+                  "const domingo = sumar(((7 - hoy.getDay()) % 7) || 7);",
+                  "pm.collectionVariables.set(\"hoy\", f(hoy));",
+                  "pm.collectionVariables.set(\"fechaClase\", f(sumar(7)));",
+                  "pm.collectionVariables.set(\"fechaClaseSiguiente\", f(sumar(8)));",
+                  "pm.collectionVariables.set(\"fechaLibre\", f(sumar(9)));",
+                  "pm.collectionVariables.set(\"fechaDomingo\", f(domingo));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-001 Registrar plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mensual prueba {{rand}}\",\n  \"descripcion\": \"Acceso por 30 días\",\n  \"duracionDias\": 30,\n  \"precio\": 80,\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idPlanNuevo\", pm.response.json().data.idPlan);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002 Listar planes (combo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Cada plan tiene nombre, duración, precio y estado\", () => pm.expect(pm.response.json()[0]).to.include.keys(\"nombre\", \"duracionDias\", \"precio\", \"estado\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: cliente 6",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Carla\",\n  \"apellidos\": \"Medina Ruiz\",\n  \"dni\": \"{{dni}}\",\n  \"correo\": \"socio{{dni}}@gmail.com\",\n  \"telefono\": \"999222333\",\n  \"fechaNacimiento\": \"2000-05-10\",\n  \"direccion\": \"Lima\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const c = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idCliente6\", c.idCliente);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003 Membresía mensual (30 días, S/ 80)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": 2,\n  \"fechaInicio\": \"2026-10-02\",\n  \"idTipoPago\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Fin 2026-11-01 y pago de 80\", () => { pm.expect(r.membresia.fechaFin).to.eql(\"2026-11-01\"); pm.expect(Number(r.pago.monto)).to.eql(80); });",
+                  "pm.test(\"Concepto del pago\", () => pm.expect(r.pago.concepto).to.include(\"Pago membresía\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004 Membresía trimestral (90 días, S/ 210)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": 3,\n  \"fechaInicio\": \"2026-10-02\",\n  \"idTipoPago\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Fin 2026-12-31 y pago de 210\", () => { pm.expect(r.membresia.fechaFin).to.eql(\"2026-12-31\"); pm.expect(Number(r.pago.monto)).to.eql(210); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005 Sin fecha de inicio (empieza hoy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": 1,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const m = pm.response.json().membresia;",
+                  "pm.test(\"Inicio hoy y fin a los 15 días\", () => { const d = (new Date(m.fechaFin) - new Date(m.fechaInicio)) / 86400000; pm.expect(d).to.eql(15); pm.expect(m.fechaInicio).to.eql(pm.collectionVariables.get(\"hoy\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006a Cliente inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 999999,\n  \"idPlan\": 2,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: El cliente no existe\", () => pm.expect(pm.response.json().error).to.include(\"El cliente no existe\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006b Plan inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": 999999,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: El plan no existe\", () => pm.expect(pm.response.json().error).to.include(\"El plan no existe\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006c Método de pago inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": 2,\n  \"idTipoPago\": 999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: El tipo de pago no existe\", () => pm.expect(pm.response.json().error).to.include(\"El tipo de pago no existe\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007a Cliente inactivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 4,\n  \"idPlan\": 2,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El cliente 4 (Renzo Aguilar) está inactivo en los datos de prueba."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: El cliente está inactivo\", () => pm.expect(pm.response.json().error).to.include(\"El cliente está inactivo\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: desactivar el plan creado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/plan/{{idPlanNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "plan",
+                "{{idPlanNuevo}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007b Plan inactivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": {{idPlanNuevo}},\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: El plan está inactivo\", () => pm.expect(pm.response.json().error).to.include(\"El plan está inactivo\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008 Campo obligatorio faltante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPlan\": 2,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Falta el campo obligatorio: idCliente\", () => pm.expect(pm.response.json().error).to.include(\"Falta el campo obligatorio: idCliente\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009 Membresías vigentes hoy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-vigentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-vigentes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const l = pm.response.json();",
+                  "pm.test(\"Incluye al cliente 6 con fechas y días restantes\", () => { const m = l.find(x => x.idCliente == pm.collectionVariables.get(\"idCliente6\")); pm.expect(m).to.include.keys(\"fechaInicio\", \"fechaFin\", \"diasRestantes\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010 Membresías por vencer en 30 días",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-por-vencer?dias=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-por-vencer"
+              ],
+              "query": [
+                {
+                  "key": "dias",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const l = pm.response.json();",
+                  "pm.test(\"Incluye al cliente 6 con su teléfono\", () => pm.expect(l.find(x => x.idCliente == pm.collectionVariables.get(\"idCliente6\"))).to.have.property(\"telefono\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011 Por vencer sin indicar días (7 por defecto)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-por-vencer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-por-vencer"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Ninguna vence en más de 7 días\", () => pm.response.json().forEach(m => pm.expect(Number(m.diasRestantes)).to.be.at.most(7)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: contar membresías vigentes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-vigentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-vigentes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"vigentesAntes\", pm.response.json().length);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012 Transacción: error simulado (rollback)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": {{idCliente6}},\n  \"idPlan\": 2,\n  \"idTipoPago\": 1,\n  \"simularError\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Guarda la membresía y el pago y luego lanza un error a propósito: con @Transactional no debe quedar nada grabado."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: rollback\", () => pm.expect(pm.response.json().error).to.include(\"rollback\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012b No quedó la membresía ni el pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/membresias-vigentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "membresias-vigentes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La cantidad de membresías vigentes no cambió\", () => pm.expect(pm.response.json().length).to.eql(Number(pm.collectionVariables.get(\"vigentesAntes\"))));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HU05 - Categorías, productos, stock y ventas (Armas Trujillo, Mauricio Alonso - U20221B140)",
+      "description": "Rol: Vendedor. Las ventas sin cliente son de 'Público general'.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenVendedor}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Login Vendedor (marmas)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"marmas\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenVendedor\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioVendedor\", r.idUsuario);",
+                  "pm.test(\"Rol Vendedor\", () => pm.expect(r.roles).to.include(\"Vendedor\"));",
+                  "pm.test(\"Menú con 2 opciones\", () => pm.expect(r.opciones.length).to.eql(2));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "// Fechas de prueba relativas a hoy: clase con membresía (+7 días), clase libre (+8) y el próximo domingo",
+                  "const f = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');",
+                  "const sumar = n => { const d = new Date(); d.setDate(d.getDate() + n); return d; };",
+                  "const hoy = new Date();",
+                  "const domingo = sumar(((7 - hoy.getDay()) % 7) || 7);",
+                  "pm.collectionVariables.set(\"hoy\", f(hoy));",
+                  "pm.collectionVariables.set(\"fechaClase\", f(sumar(7)));",
+                  "pm.collectionVariables.set(\"fechaClaseSiguiente\", f(sumar(8)));",
+                  "pm.collectionVariables.set(\"fechaLibre\", f(sumar(9)));",
+                  "pm.collectionVariables.set(\"fechaDomingo\", f(domingo));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-001 Registrar categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/categoriaProducto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "categoriaProducto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Suplementos prueba {{rand}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"idCategoriaNueva\", pm.response.json().data.idCategoria);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002a Registrar producto Whey (S/ 120, stock 15)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": { \"idCategoria\": {{idCategoriaNueva}} },\n  \"nombre\": \"Proteína Whey prueba {{rand}}\",\n  \"precio\": 120,\n  \"stock\": 15,\n  \"stockMinimo\": 3,\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const p = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idWhey\", p.idProducto);",
+                  "pm.test(\"Stock 15 y mínimo 3\", () => { pm.expect(p.stock).to.eql(15); pm.expect(p.stockMinimo).to.eql(3); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002b Registrar producto Bebida (S/ 8, stock 30, mínimo 10)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": { \"idCategoria\": {{idCategoriaNueva}} },\n  \"nombre\": \"Bebida isotónica prueba {{rand}}\",\n  \"precio\": 8,\n  \"stock\": 30,\n  \"stockMinimo\": 10,\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const p = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idBebida\", p.idProducto);",
+                  "pm.test(\"Stock 30 y mínimo 10\", () => { pm.expect(p.stock).to.eql(30); pm.expect(p.stockMinimo).to.eql(10); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación: producto inactivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": { \"idCategoria\": {{idCategoriaNueva}} },\n  \"nombre\": \"Producto descontinuado {{rand}}\",\n  \"precio\": 10,\n  \"stock\": 5,\n  \"stockMinimo\": 1,\n  \"estado\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const p = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idInactivo\", p.idProducto);",
+                  "pm.test(\"Stock 5 y mínimo 1\", () => { pm.expect(p.stock).to.eql(5); pm.expect(p.stockMinimo).to.eql(1); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003a Listar productos (combo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye la Whey\", () => pm.expect(pm.response.json().map(p => p.idProducto)).to.include(Number(pm.collectionVariables.get(\"idWhey\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003b Ver producto por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{idWhey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{idWhey}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Precio 120\", () => pm.expect(pm.response.json().precio).to.eql(120));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003c Producto inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005 Venta de dos productos (1 Whey + 2 bebidas)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idWhey}}, \"cantidad\": 1 },\n    { \"idProducto\": {{idBebida}}, \"cantidad\": 2 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const r = pm.response.json();",
+                  "pm.test(\"Total 136 con 2 detalles\", () => { pm.expect(r.venta.total).to.eql(136); pm.expect(r.detalles.length).to.eql(2); });",
+                  "pm.collectionVariables.set(\"idVenta\", r.venta.idVenta);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006a Descuento de stock: Whey queda en 14",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{idWhey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{idWhey}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Stock 14\", () => pm.expect(pm.response.json().stock).to.eql(14));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006b Descuento de stock: bebida queda en 28",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{idBebida}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{idBebida}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Stock 28\", () => pm.expect(pm.response.json().stock).to.eql(28));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007 Stock insuficiente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idWhey}}, \"cantidad\": 50 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Stock insuficiente\", () => pm.expect(pm.response.json().error).to.include(\"Stock insuficiente\"));",
+                  "pm.test(\"Mensaje: disponible: 14\", () => pm.expect(pm.response.json().error).to.include(\"disponible: 14\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008a Venta sin productos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: al menos un producto\", () => pm.expect(pm.response.json().error).to.include(\"al menos un producto\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008b Cantidad inválida (0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idWhey}}, \"cantidad\": 0 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Cantidad inválida\", () => pm.expect(pm.response.json().error).to.include(\"Cantidad inválida\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009a Producto inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": 999999, \"cantidad\": 1 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: no existe\", () => pm.expect(pm.response.json().error).to.include(\"no existe\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009b Producto inactivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idInactivo}}, \"cantidad\": 1 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: está inactivo\", () => pm.expect(pm.response.json().error).to.include(\"está inactivo\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010 Vender 18 bebidas (queda en 10 = mínimo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idBebida}}, \"cantidad\": 18 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010b Aparece en stock bajo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/productos-stock-bajo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "productos-stock-bajo"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La bebida aparece con stock 10 y mínimo 10\", () => { const p = pm.response.json().find(x => x.idProducto == pm.collectionVariables.get(\"idBebida\")); pm.expect(Number(p.stock)).to.eql(10); pm.expect(Number(p.stockMinimo)).to.eql(10); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004 Reponer stock (PUT con el producto completo, stock 30)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{idBebida}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{idBebida}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProducto\": {{idBebida}},\n  \"categoria\": { \"idCategoria\": {{idCategoriaNueva}} },\n  \"nombre\": \"Bebida isotónica repuesta\",\n  \"precio\": 8,\n  \"stock\": 30,\n  \"stockMinimo\": 10,\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El PUT asigna el stock final (10 + 20 repuestos = 30); no suma automáticamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Stock 30\", () => pm.expect(pm.response.json().data.stock).to.eql(30));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004b Ya no aparece en stock bajo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/productos-stock-bajo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "productos-stock-bajo"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"La bebida ya no está\", () => pm.expect(pm.response.json().map(x => x.idProducto)).to.not.include(Number(pm.collectionVariables.get(\"idBebida\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011 Historial de ventas de hoy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/consulta/ventas?desde={{hoy}}&hasta={{hoy}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "consulta",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "{{hoy}}"
+                },
+                {
+                  "key": "hasta",
+                  "value": "{{hoy}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "const l = pm.response.json();",
+                  "pm.test(\"Incluye la venta con vendedor, cliente y total\", () => { const v = l.find(x => x.idVenta == pm.collectionVariables.get(\"idVenta\")); pm.expect(v).to.include.keys(\"fecha\", \"vendedor\", \"cliente\", \"total\"); });",
+                  "pm.test(\"Sin cliente se muestra Público general\", () => pm.expect(l.filter(x => x.cliente === \"Público general\").length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012 Reversión integral (2.º item sin stock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idWhey}}, \"cantidad\": 1 },\n    { \"idProducto\": {{idBebida}}, \"cantidad\": 999 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Stock insuficiente\", () => pm.expect(pm.response.json().error).to.include(\"Stock insuficiente\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012b La Whey no perdió stock (sigue en 14)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{idWhey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{idWhey}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Stock 14\", () => pm.expect(pm.response.json().stock).to.eql(14));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012c Transacción: error simulado (rollback)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"idProducto\": {{idWhey}}, \"cantidad\": 1 }\n  ],\n  \"simularError\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: rollback\", () => pm.expect(pm.response.json().error).to.include(\"rollback\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-012d La Whey sigue en 14 tras el rollback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/producto/{{idWhey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "producto",
+                "{{idWhey}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Stock 14\", () => pm.expect(pm.response.json().stock).to.eql(14));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HU06 - Roles, permisos y menú dinámico (Arias Hernandez, Cristhian Sebastian - U20241a467)",
+      "description": "Rol: Administrador. Comprueba que cada rol ve solo sus opciones y que el backend rechaza (403) lo que su rol no tiene.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{tokenAdmin}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "TC-001 Menú del Administrador: carias (12 opciones)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"carias\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenAdmin\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioAdmin\", r.idUsuario);",
+                  "pm.test(\"Rol Administrador\", () => pm.expect(r.roles).to.include(\"Administrador\"));",
+                  "pm.test(\"Menú con 12 opciones\", () => pm.expect(r.opciones.length).to.eql(12));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-002 Menú de Control de ingreso: gcermeno (7 opciones)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"gcermeno\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenControl\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioControl\", r.idUsuario);",
+                  "pm.test(\"Rol Control de ingreso\", () => pm.expect(r.roles).to.include(\"Control de ingreso\"));",
+                  "pm.test(\"Menú con 7 opciones\", () => pm.expect(r.opciones.length).to.eql(7));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "pm.test(\"Sin tienda ni configuración\", () => { const rutas = pm.response.json().opciones.map(o => o.ruta); pm.expect(rutas).to.not.include(\"tienda\"); pm.expect(rutas).to.not.include(\"configuracion\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-003 Menú del Vendedor: marmas (Inicio y Tienda)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"marmas\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.collectionVariables.set(\"tokenVendedor\", r.token);",
+                  "pm.collectionVariables.set(\"idUsuarioVendedor\", r.idUsuario);",
+                  "pm.test(\"Rol Vendedor\", () => pm.expect(r.roles).to.include(\"Vendedor\"));",
+                  "pm.test(\"Menú con 2 opciones\", () => pm.expect(r.opciones.length).to.eql(2));",
+                  "pm.test(\"No expone el password\", () => pm.expect(JSON.stringify(r)).to.not.include(\"$2a$\"));",
+                  "pm.test(\"Solo inicio y tienda\", () => pm.expect(pm.response.json().opciones.map(o => o.ruta)).to.eql([\"inicio\", \"tienda\"]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-004 Vendedor intenta contratar una membresía",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/membresia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 1,\n  \"idPlan\": 2,\n  \"idTipoPago\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenVendedor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Mensaje: no tiene permiso\", () => pm.expect(pm.response.json().error).to.include(\"no tiene permiso\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005a Control de ingreso intenta registrar una venta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/registro/venta",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "registro",
+                "venta"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [ { \"idProducto\": 1, \"cantidad\": 1 } ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenControl}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Mensaje: no tiene permiso\", () => pm.expect(pm.response.json().error).to.include(\"no tiene permiso\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-005b Control de ingreso intenta ver los usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenControl}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-006 Sin token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/cliente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "cliente"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-007 Listar opciones del menú",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/opcion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "opcion"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"12 opciones\", () => pm.expect(pm.response.json().length).to.eql(12));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-008 Crear rol Entrenador (Inicio, Socios, Clases)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/rol",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rol"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Entrenador {{rand}}\",\n  \"opciones\": [ { \"idOpcion\": 1 }, { \"idOpcion\": 5 }, { \"idOpcion\": 7 } ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "const r = pm.response.json().data;",
+                  "pm.collectionVariables.set(\"idRolNuevo\", r.idRol);",
+                  "pm.test(\"Con 3 opciones\", () => pm.expect(r.opciones.length).to.eql(3));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009a Crear usuario con el rol nuevo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Bruno\",\n  \"apellidos\": \"Vargas Peña\",\n  \"dni\": \"{{dni}}\",\n  \"login\": \"ent{{rand}}\",\n  \"password\": \"{{password}}\",\n  \"correo\": \"ent{{rand}}@gym.com\",\n  \"estado\": true,\n  \"roles\": [ { \"idRol\": {{idRolNuevo}} } ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"dni\", String(Math.floor(10000000 + Math.random() * 89999999)));",
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));",
+                  "pm.collectionVariables.set(\"loginNuevo\", \"ent\" + pm.variables.get(\"rand\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Tiene el rol asignado\", () => pm.expect(pm.response.json().data.roles[0].idRol).to.eql(Number(pm.collectionVariables.get(\"idRolNuevo\"))));",
+                  "pm.test(\"No devuelve el password\", () => pm.expect(pm.response.json().data).to.not.have.property(\"password\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-009b El nuevo usuario ve solo su menú",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{loginNuevo}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Menú dinámico: inicio, socios y clases\", () => pm.expect(pm.response.json().opciones.map(o => o.ruta)).to.eql([\"inicio\", \"socios\", \"clases\"]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010a Usuario sin rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/usuario",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "usuario"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Sin\",\n  \"apellidos\": \"Rol\",\n  \"login\": \"sinrol{{rand}}\",\n  \"password\": \"{{password}}\",\n  \"estado\": true,\n  \"roles\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"rand\", String(Math.floor(1000 + Math.random() * 8999)));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Asigna al menos un rol\", () => pm.expect(pm.response.json().error).to.include(\"Asigna al menos un rol\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-010b El rol Administrador no se puede modificar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/rol/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rol",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Administrador\",\n  \"opciones\": [ { \"idOpcion\": 1 } ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: no se puede modificar\", () => pm.expect(pm.response.json().error).to.include(\"no se puede modificar\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011a Desactivar el rol nuevo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/url/rol/{{idRolNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "rol",
+                "{{idRolNuevo}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-011b Sin rol activo, el usuario ya no tiene opciones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/url/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "url",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{loginNuevo}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Menú vacío\", () => pm.expect(pm.response.json().opciones.length).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "password",
+      "value": "1234"
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenControl",
+      "value": ""
+    },
+    {
+      "key": "tokenVendedor",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioAdmin",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioControl",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioVendedor",
+      "value": ""
+    },
+    {
+      "key": "hoy",
+      "value": ""
+    },
+    {
+      "key": "fechaClase",
+      "value": ""
+    },
+    {
+      "key": "fechaClaseSiguiente",
+      "value": ""
+    },
+    {
+      "key": "fechaLibre",
+      "value": ""
+    },
+    {
+      "key": "fechaDomingo",
+      "value": ""
+    }
+  ]
+}

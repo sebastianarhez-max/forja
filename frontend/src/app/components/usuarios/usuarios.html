@@ -1,5 +1,5 @@
 <form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
-  <h2 class="card-title">{{ editando() ? 'Editar usuario' : 'Nuevo usuario administrador' }}</h2>
+  <h2 class="card-title">{{ editando() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
   <div class="form-grid">
     <div class="field">
       <label for="nombres">Nombres</label>
@@ -44,6 +44,17 @@
       </select>
     </div>
   </div>
+  <div class="field" style="margin-top: 14px">
+    <label>Rol @if (editando()?.idUsuario === miId) { <span class="opc">(no puedes cambiar tus propios roles)</span> }</label>
+    <div class="chips">
+      @for (r of roles(); track r.idRol) {
+        <button type="button" class="chip" [class.activo]="rolesMarcados().has(r.idRol!)"
+                [disabled]="editando()?.idUsuario === miId" (click)="alternarRol(r.idRol!)">
+          {{ r.nombre }}
+        </button>
+      }
+    </div>
+  </div>
   <div class="form-actions">
     <button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ editando() ? 'Guardar cambios' : 'Crear usuario' }}</button>
     @if (editando()) {
@@ -56,12 +67,13 @@
   <h2 class="card-title">Usuarios del sistema</h2>
   <div class="table-wrap">
     <table class="table">
-      <thead><tr><th>Nombre</th><th>Usuario</th><th>Correo</th><th>Teléfono</th><th>Registrado</th><th>Estado</th><th></th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Correo</th><th>Teléfono</th><th>Registrado</th><th>Estado</th><th></th></tr></thead>
       <tbody>
         @for (u of lista(); track u.idUsuario) {
           <tr [class.inactivo]="!u.estado">
             <td class="strong">{{ u.nombres }} {{ u.apellidos }} @if (u.idUsuario === miId) { <span class="badge badge-orange">Tú</span> }</td>
             <td>{{ u.login }}</td>
+            <td>{{ nombresRoles(u) }}</td>
             <td>{{ u.correo }}</td>
             <td>{{ u.telefono }}</td>
             <td>{{ u.fechaRegistro | fecha }}</td>

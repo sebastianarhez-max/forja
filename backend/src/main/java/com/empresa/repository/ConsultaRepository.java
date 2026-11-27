@@ -92,12 +92,12 @@ public class ConsultaRepository {
 
     /** C9. Ventas de la tienda en un rango de fechas. */
     public List<Map<String, Object>> ventasPorFecha(LocalDate desde, LocalDate hasta) {
-        return q("SELECT v.id_venta, v.fecha, CONCAT(u.nombres, ' ', u.apellidos) AS vendedor, COALESCE(CONCAT(c.nombres, ' ', c.apellidos), 'Público general') AS cliente, v.total FROM venta v JOIN usuario u ON u.id_usuario = v.id_usuario LEFT JOIN cliente c ON c.id_cliente = v.id_cliente WHERE CAST(v.fecha AS DATE) BETWEEN ? AND ? ORDER BY v.fecha", desde, hasta);
+        return q("SELECT v.id_venta, v.fecha, CONCAT(u.nombres, ' ', u.apellidos) AS vendedor, COALESCE(c.nombres || ' ' || c.apellidos, 'Público general') AS cliente, v.total FROM venta v JOIN usuario u ON u.id_usuario = v.id_usuario LEFT JOIN cliente c ON c.id_cliente = v.id_cliente WHERE CAST(v.fecha AS DATE) BETWEEN ? AND ? ORDER BY v.fecha", desde, hasta);
     }
 
     /** C11. Inscritos de un torneo con su entrenador y resultado. */
     public List<Map<String, Object>> inscritosTorneo(Integer idTorneo) {
-        return q("SELECT it.id_inscripcion, c.nombres, c.apellidos, it.categoria, it.sexo, CONCAT(e.nombres, ' ', e.apellidos) AS entrenador, it.puesto, it.puntaje FROM inscripcion_torneo it JOIN cliente c ON c.id_cliente = it.id_cliente LEFT JOIN entrenador e ON e.id_entrenador = it.id_entrenador WHERE it.id_torneo = ? ORDER BY it.puesto IS NULL, it.puesto", idTorneo);
+        return q("SELECT it.id_inscripcion, c.nombres, c.apellidos, it.categoria, it.sexo, COALESCE(e.nombres || ' ' || e.apellidos, 'Sin entrenador') AS entrenador, it.puesto, it.puntaje FROM inscripcion_torneo it JOIN cliente c ON c.id_cliente = it.id_cliente LEFT JOIN entrenador e ON e.id_entrenador = it.id_entrenador WHERE it.id_torneo = ? ORDER BY it.puesto IS NULL, it.puesto", idTorneo);
     }
 
     /** C12. Horarios de un entrenador. */

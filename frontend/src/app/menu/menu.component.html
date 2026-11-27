@@ -1,32 +1,42 @@
 <header class="topbar">
-  <button class="hamburguesa" type="button" (click)="menuAbierto.set(!menuAbierto())" aria-label="Abrir menú">
+  <a [routerLink]="inicio" class="marca">FORJA</a>
+
+  <button class="hamburguesa" type="button" (click)="menuAbierto.set(!menuAbierto())" aria-label="Mostrar u ocultar el menú">
     <span></span><span></span><span></span>
   </button>
-  <a routerLink="/inicio" class="marca">FORJA</a>
-  <div class="usuario">
-    <span class="rol">Administrador: </span><span class="nombre">{{ nombre }}</span>
-  </div>
+
+  <!-- Menú dinámico: un desplegable por grupo, con las opciones del rol del usuario -->
+  <nav class="navegacion" [class.abierto]="menuAbierto()">
+    <ul class="grupos">
+      @for (g of menu; track g.titulo) {
+        <li class="grupo" [class.abierto]="grupoAbierto() === g.titulo">
+          <button type="button" class="grupo-boton" [class.activo]="grupoActivo(g)"
+                  [attr.aria-expanded]="grupoAbierto() === g.titulo" (click)="alternarGrupo(g.titulo)">
+            {{ g.titulo }} <span class="flecha">▾</span>
+          </button>
+          <ul class="desplegable">
+            @for (o of g.opciones; track o.idOpcion) {
+              <li><a [routerLink]="['/', o.ruta]" routerLinkActive="activo">{{ o.nombre }}</a></li>
+            }
+          </ul>
+        </li>
+      }
+    </ul>
+
+    <div class="sesion">
+      <div class="usuario">
+        <span class="nombre">{{ nombre }}</span>
+        <span class="rol">{{ roles }}</span>
+      </div>
+      <button type="button" class="salir" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </nav>
 </header>
 
-<div class="cuerpo">
-  <nav class="sidebar" [class.abierto]="menuAbierto()">
-    <div class="menu">
-      @for (g of menu; track g.titulo) {
-        <div class="grupo">{{ g.titulo }}</div>
-        <ul>
-          @for (item of g.items; track item.ruta) {
-            <li><a [routerLink]="item.ruta" routerLinkActive="activo">{{ item.texto }}</a></li>
-          }
-        </ul>
-      }
-    </div>
-    <button type="button" class="salir" (click)="cerrarSesion()">Cerrar sesión</button>
-  </nav>
-  @if (menuAbierto()) {
-    <div class="velo" (click)="menuAbierto.set(false)"></div>
-  }
+@if (grupoAbierto() || menuAbierto()) {
+  <div class="velo" (click)="cerrarMenus()"></div>
+}
 
-  <main class="contenido">
-    <router-outlet />
-  </main>
-</div>
+<main class="contenido">
+  <router-outlet />
+</main>

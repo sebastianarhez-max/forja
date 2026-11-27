@@ -15,7 +15,7 @@
   <section class="panel-form">
     <form [formGroup]="form" (ngSubmit)="ingresar()" class="caja" novalidate>
       <h2>Iniciar sesión</h2>
-      <p class="muted small">Acceso solo para administradores</p>
+      <p class="muted small">Acceso para el personal del gimnasio</p>
 
       @if (error()) {
         <div class="alert bad">{{ error() }}</div>

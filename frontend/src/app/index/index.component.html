@@ -7,36 +7,45 @@
 </div>
 
 <div class="kpis">
-  <a class="kpi" routerLink="/membresias/vigentes">
-    <span class="kpi-label">Membresías vigentes</span>
-    <span class="kpi-valor">{{ vigentes().length }}</span>
-    <span class="kpi-pie">socios con acceso activo</span>
-  </a>
-  <a class="kpi" routerLink="/membresias/por-vencer" [class.alerta]="porVencer().length > 0">
-    <span class="kpi-label">Vencen en 7 días</span>
-    <span class="kpi-valor">{{ porVencer().length }}</span>
-    <span class="kpi-pie">para contactar</span>
-  </a>
-  <a class="kpi" routerLink="/tienda/stock-bajo" [class.alerta]="stockBajo().length > 0">
-    <span class="kpi-label">Productos con stock bajo</span>
-    <span class="kpi-valor">{{ stockBajo().length }}</span>
-    <span class="kpi-pie">por reponer</span>
-  </a>
-  <a class="kpi oscuro" routerLink="/reportes">
-    <span class="kpi-label">Ingresos del mes</span>
-    <span class="kpi-valor">{{ (ingresosMes()?.total ?? 0) | soles }}</span>
-    <span class="kpi-pie">membresías + tienda + clases libres</span>
-  </a>
+  @if (ver.membresias) {
+    <a class="kpi" routerLink="/membresias/vigentes">
+      <span class="kpi-label">Membresías vigentes</span>
+      <span class="kpi-valor">{{ vigentes().length }}</span>
+      <span class="kpi-pie">socios con acceso activo</span>
+    </a>
+    <a class="kpi" routerLink="/membresias/por-vencer" [class.alerta]="porVencer().length > 0">
+      <span class="kpi-label">Vencen en 7 días</span>
+      <span class="kpi-valor">{{ porVencer().length }}</span>
+      <span class="kpi-pie">para contactar</span>
+    </a>
+  }
+  @if (ver.tienda) {
+    <a class="kpi" routerLink="/tienda/stock-bajo" [class.alerta]="stockBajo().length > 0">
+      <span class="kpi-label">Productos con stock bajo</span>
+      <span class="kpi-valor">{{ stockBajo().length }}</span>
+      <span class="kpi-pie">por reponer</span>
+    </a>
+  }
+  @if (ver.reportes) {
+    <a class="kpi oscuro" routerLink="/reportes">
+      <span class="kpi-label">Ingresos del mes</span>
+      <span class="kpi-valor">{{ (ingresosMes()?.total ?? 0) | soles }}</span>
+      <span class="kpi-pie">membresías + tienda + clases libres</span>
+    </a>
+  }
 </div>
 
 <div class="grid-2">
+  @if (verClases) {
   <section class="card">
     <div class="card-head">
       <div>
         <h2 class="card-title">Clases de hoy</h2>
         <p class="card-sub">Ocupación promedio: {{ ocupacionHoy() }}%</p>
       </div>
-      <a class="btn btn-outline btn-sm" routerLink="/asistencia/reservas">Reservar cupo</a>
+      @if (ver.asistencia) {
+        <a class="btn btn-outline btn-sm" routerLink="/asistencia/reservas">Reservar cupo</a>
+      }
     </div>
     <div class="table-wrap">
       <table class="table">
@@ -56,7 +65,9 @@
                 <span class="small">{{ c.ocupados }} / {{ c.cupo }}</span>
               </td>
               <td>
-                <a class="btn btn-link btn-sm" routerLink="/asistencia/asistentes" [queryParams]="{ idHorario: c.horario.idHorario, fecha: hoy }">Asistentes →</a>
+                @if (ver.asistencia) {
+                  <a class="btn btn-link btn-sm" routerLink="/asistencia/asistentes" [queryParams]="{ idHorario: c.horario.idHorario, fecha: hoy }">Asistentes →</a>
+                }
               </td>
             </tr>
           } @empty {
@@ -66,15 +77,19 @@
       </table>
     </div>
   </section>
+  }
 
   <div class="stack">
     <section class="card">
       <h2 class="card-title">Accesos rápidos</h2>
       <div class="rapidos">
-        <a routerLink="/asistencia/reservas"><strong>Reservar cupo</strong><span>Clases</span></a>
-        <a routerLink="/clases-libres/cobrar"><strong>Cobrar clase libre</strong><span>Caja</span></a>
-        <a routerLink="/membresias/contratar"><strong>Contratar membresía</strong><span>Socios</span></a>
-        <a routerLink="/tienda/venta"><strong>Nueva venta</strong><span>Tienda</span></a>
+        @if (ver.asistencia) { <a routerLink="/asistencia/reservas"><strong>Reservar cupo</strong><span>Clases</span></a> }
+        @if (ver.clasesLibres) { <a routerLink="/clases-libres/cobrar"><strong>Cobrar clase libre</strong><span>Caja</span></a> }
+        @if (ver.membresias) { <a routerLink="/membresias/contratar"><strong>Contratar membresía</strong><span>Socios</span></a> }
+        @if (ver.tienda) {
+          <a routerLink="/tienda/venta"><strong>Nueva venta</strong><span>Tienda</span></a>
+          <a routerLink="/tienda/reposicion"><strong>Reponer stock</strong><span>Inventario</span></a>
+        }
       </div>
     </section>
 
@@ -86,6 +101,7 @@
       </a>
     }
 
+    @if (ver.membresias) {
     <section class="card">
       <h2 class="card-title">Membresías por vencer</h2>
       <ul class="lista-simple">
@@ -99,7 +115,9 @@
         }
       </ul>
     </section>
+    }
 
+    @if (ver.tienda) {
     <section class="card">
       <h2 class="card-title">Stock bajo</h2>
       <ul class="lista-simple">
@@ -113,5 +131,6 @@
         }
       </ul>
     </section>
+    }
   </div>
 </div>

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.empresa.dto.*;
 import com.empresa.entity.EstadoAsistencia;
@@ -14,7 +15,9 @@ import com.empresa.repository.MembresiaRepository;
 import com.empresa.repository.PagoRepository;
 import com.empresa.service.ReporteService;
 
+/** Solo consultas: transacción de solo lectura (readOnly = true), como los listados del ejemplo del profesor. */
 @Service
+@Transactional(readOnly = true)
 public class ReporteServiceImpl implements ReporteService {
 
     @Autowired

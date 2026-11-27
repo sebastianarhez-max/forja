@@ -3,6 +3,8 @@ package com.empresa.security;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -42,7 +44,9 @@ public class JwtProvider {
         claims.put("idUsuario", p.getIdUsuario());
         claims.put("nombreCompleto", p.getNombreCompleto());
         claims.put("login", p.getLogin());
-        claims.put("roles", p.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList()));
+        // Roles y opciones del menú: el frontend arma el menú lateral con estas opciones
+        claims.put("roles", p.getRoles());
+        claims.put("opciones", opcionesParaToken(p));
 
         Date now = new Date();
         return Jwts.builder()
@@ -52,6 +56,18 @@ public class JwtProvider {
                 .expiration(new Date(now.getTime() + expiration * 1000))
                 .signWith(key())
                 .compact();
+    }
+
+    /** Solo los datos que necesita el menú (sin estado), en el orden en que se muestran. */
+    private List<Map<String, Object>> opcionesParaToken(UsuarioPrincipal p) {
+        return p.getOpciones().stream().map(o -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("idOpcion", o.getIdOpcion());
+            m.put("nombre", o.getNombre());
+            m.put("ruta", o.getRuta());
+            m.put("tipo", o.getTipo());
+            return m;
+        }).collect(Collectors.toList());
     }
 
     public String getNombreUsuarioFromToken(String token) {

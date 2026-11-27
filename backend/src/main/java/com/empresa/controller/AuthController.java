@@ -48,6 +48,9 @@ public class AuthController {
         response.put("token", token);
         response.put("idUsuario", usuario.getIdUsuario());
         response.put("nombreCompleto", usuario.getNombreCompleto());
+        // Lo mismo que va dentro del token: el frontend arma el menú con estas opciones
+        response.put("roles", usuario.getRoles());
+        response.put("opciones", usuario.getOpciones());
         return ResponseEntity.ok(response);
     }
 }

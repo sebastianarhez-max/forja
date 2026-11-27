@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login.component';
 import { Seccion } from './components/seccion/seccion';
 import { MenuComponent } from './menu/menu.component';
-import { authGuard, loginGuard } from './security/auth.guard';
+import { authGuard, loginGuard, opcionGuard } from './security/auth.guard';
 // Inicio y reportes
 import { IndexComponent } from './index/index.component';
 import { Reportes } from './components/reportes/reportes';
@@ -37,12 +37,14 @@ import { Rutinas } from './components/rutinas/rutinas';
 import { Torneos } from './components/torneos/torneos';
 import { MetodosPago } from './components/metodos-pago/metodos-pago';
 import { Usuarios } from './components/usuarios/usuarios';
+import { Roles } from './components/roles/roles';
 
 /**
  * Rutas del sistema. Cada módulo usa el componente Seccion (título + pestañas).
  * Relación con las historias de usuario:
  *   HU01 -> /clases        HU02 -> /socios y /asistencia      HU03 -> /clases-libres
  *   HU04 -> /membresias    HU05 -> /tienda
+ * El menú lateral y el acceso a cada módulo dependen de las opciones del rol del usuario.
  */
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [loginGuard], title: 'FORJA · Iniciar sesión' },
@@ -50,6 +52,8 @@ export const routes: Routes = [
     path: '',
     component: MenuComponent,
     canActivate: [authGuard],
+    // Cada módulo solo se abre si su ruta está entre las opciones del rol (tabla rol_has_opcion)
+    canActivateChild: [opcionGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
       { path: 'inicio', component: IndexComponent, title: 'FORJA · Inicio' },
@@ -209,6 +213,7 @@ export const routes: Routes = [
           { path: 'metodos-pago', component: MetodosPago },
         ],
       },
+      { path: 'roles', component: Roles, title: 'FORJA · Roles y permisos' },
     ],
   },
   { path: '**', redirectTo: '' },

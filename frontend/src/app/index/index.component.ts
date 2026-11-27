@@ -18,7 +18,10 @@ interface ClaseHoy {
   cupo: number;
 }
 
-/** Panel de inicio: indicadores del día y accesos rápidos para el administrador. */
+/**
+ * Panel de inicio: indicadores del día y accesos rápidos.
+ * Cada bloque solo se muestra (y solo se consulta al backend) si el rol del usuario tiene esa opción.
+ */
 @Component({
   selector: 'app-index',
   imports: [RouterLink, SolesPipe, HoraPipe, FechaPipe],
@@ -30,7 +33,20 @@ export class IndexComponent implements OnInit {
   private readonly horarioService = inject(HorarioService);
   private readonly torneoService = inject(TorneoService);
 
-  readonly nombre = inject(TokenService).getNombreCompleto().split(' ')[0];
+  private readonly tokenService = inject(TokenService);
+  readonly nombre = this.tokenService.getNombreCompleto().split(' ')[0];
+
+  /** Qué partes del panel puede ver el usuario según las opciones de su rol. */
+  readonly ver = {
+    asistencia: this.tokenService.tieneOpcion('asistencia'),
+    clasesLibres: this.tokenService.tieneOpcion('clases-libres'),
+    membresias: this.tokenService.tieneOpcion('membresias'),
+    tienda: this.tokenService.tieneOpcion('tienda'),
+    reportes: this.tokenService.tieneOpcion('reportes'),
+    torneos: this.tokenService.tieneOpcion('torneos'),
+  };
+  /** Las clases del día interesan a quien atiende reservas o cobra clases libres. */
+  readonly verClases = this.ver.asistencia || this.ver.clasesLibres;
   readonly hoy = hoyIso();
   readonly fechaLarga = (() => {
     const t = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -53,13 +69,14 @@ export class IndexComponent implements OnInit {
 
   ngOnInit(): void {
     const primerDiaMes = this.hoy.substring(0, 8) + '01';
+    // Lo que el rol no tiene no se pide al backend (respondería 403)
     forkJoin({
-      vigentes: this.consultaService.membresiasVigentes(),
-      porVencer: this.consultaService.membresiasPorVencer(7),
-      stock: this.consultaService.productosStockBajo(),
-      ingresos: this.consultaService.ingresos(primerDiaMes, this.hoy),
-      horarios: this.horarioService.lista(),
-      torneos: this.torneoService.lista(),
+      vigentes: this.ver.membresias ? this.consultaService.membresiasVigentes() : of([] as MembresiaVigente[]),
+      porVencer: this.ver.membresias ? this.consultaService.membresiasPorVencer(7) : of([] as MembresiaVigente[]),
+      stock: this.ver.tienda ? this.consultaService.productosStockBajo() : of([] as ProductoStockBajo[]),
+      ingresos: this.ver.reportes ? this.consultaService.ingresos(primerDiaMes, this.hoy) : of(null),
+      horarios: this.verClases ? this.horarioService.lista() : of([] as Horario[]),
+      torneos: this.ver.torneos ? this.torneoService.lista() : of([] as Torneo[]),
     }).subscribe({
       next: (r) => {
         this.vigentes.set(r.vigentes);

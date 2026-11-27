@@ -1,0 +1,62 @@
+<div class="page-code">Configuración</div>
+<h1 class="page-title">Roles y permisos</h1>
+<p class="page-sub">Elige qué opciones del menú ve cada rol. El menú de cada usuario se arma con estas opciones al iniciar sesión, y el sistema no le deja usar las que no tiene.</p>
+
+<form class="card" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <h2 class="card-title">{{ editando() ? 'Editar rol' : 'Nuevo rol' }}</h2>
+  <div class="field" style="max-width: 360px; margin-bottom: 16px">
+    <label for="nombre">Nombre del rol</label>
+    <input id="nombre" formControlName="nombre" placeholder="Ej. Entrenador" />
+    <app-campo-error [control]="form.controls.nombre" />
+  </div>
+
+  @for (g of grupos; track g.tipo) {
+    @if (opcionesDelGrupo(g.tipo).length) {
+      <div class="small muted strong" style="margin: 10px 0 6px">{{ g.titulo }}</div>
+      <div class="chips">
+        @for (o of opcionesDelGrupo(g.tipo); track o.idOpcion) {
+          <button type="button" class="chip" [class.activo]="marcadas().has(o.idOpcion)" (click)="alternar(o.idOpcion)">
+            {{ o.nombre }}
+          </button>
+        }
+      </div>
+    }
+  }
+
+  <div class="form-actions" style="margin-top: 18px">
+    <button class="btn btn-primary" type="submit" [disabled]="guardando()">{{ editando() ? 'Guardar cambios' : 'Crear rol' }}</button>
+    @if (editando()) {
+      <button class="btn btn-link" type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<section class="card">
+  <h2 class="card-title">Roles del sistema</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Rol</th><th>Opciones del menú</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        @for (r of lista(); track r.idRol) {
+          <tr [class.inactivo]="!r.estado">
+            <td class="strong">{{ r.nombre }}</td>
+            <td class="wrap">{{ resumen(r) }}</td>
+            <td><span class="badge" [class.badge-ok]="r.estado" [class.badge-bad]="!r.estado">{{ r.estado ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              @if (r.idRol === idAdmin) {
+                <span class="small muted">Tiene todas las opciones</span>
+              } @else {
+                <div class="acciones">
+                  <button class="btn btn-outline btn-sm" type="button" (click)="editar(r)">Editar</button>
+                  <button class="btn btn-sm" [class.btn-danger]="r.estado" [class.btn-outline]="!r.estado" type="button" (click)="cambiarEstado(r)">{{ r.estado ? 'Desactivar' : 'Activar' }}</button>
+                </div>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="vacio">No hay roles registrados</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

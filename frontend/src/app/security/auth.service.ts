@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AppSettings } from '../app.settings';
+import { Opcion } from '../models/opcion';
 
 export interface LoginUsuario {
   login: string;
@@ -14,6 +15,8 @@ export interface JwtDTO {
   token: string;
   idUsuario: number;
   nombreCompleto: string;
+  roles: string[];
+  opciones: Opcion[];
 }
 
 @Injectable({ providedIn: 'root' })

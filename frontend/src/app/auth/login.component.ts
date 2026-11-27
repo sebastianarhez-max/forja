@@ -7,7 +7,7 @@ import { TokenService } from '../security/token.service';
 import { CampoError } from '../components/campo-error/campo-error';
 import { mensajeError } from '../shared/util';
 
-/** HU01 · Inicio de sesión del administrador (POST /url/auth/login). */
+/** HU01 · Inicio de sesión (POST /url/auth/login): el token trae los roles y las opciones del menú. */
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, CampoError],
@@ -38,7 +38,15 @@ export class LoginComponent {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: (resp) => {
         this.tokenService.guardarSesion(resp.token);
-        this.router.navigate(['/inicio']);
+        if (this.tokenService.getOpciones().length === 0) {
+          // La cuenta existe pero su rol no tiene ninguna opción del menú
+          this.tokenService.logOut();
+          this.cargando.set(false);
+          this.error.set('Tu usuario no tiene un rol con opciones asignadas. Consulta con el administrador.');
+          return;
+        }
+        // Cada rol entra a su primera opción del menú (normalmente Inicio)
+        this.router.navigateByUrl(this.tokenService.primeraRuta());
       },
       error: (err: HttpErrorResponse) => {
         this.cargando.set(false);
